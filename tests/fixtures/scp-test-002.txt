@@ -1,0 +1,38 @@
+
+	[[>]]
+[[module Rate]]
+[[/>]]
+
+**Item #:** SCP-TEST-002
+
+**Object Class:** Euclid
+
+**Special Containment Procedures:** SCP-TEST-002 requires the following containment measures:
+
+* A reinforced steel container with walls at least 5cm thick
+* Temperature maintained between 15 and 20 degrees Celsius
+* Weekly inspection by Level 2 personnel
+
+Personnel entering the containment area must:
+
+# Wear protective eyewear
+# Maintain a distance of at least 2 meters
+# Report any unusual behavior immediately
+
+**Description:** SCP-TEST-002 is a metallic sphere approximately 15cm in diameter. The sphere exhibits //anomalous gravitational properties//[[footnote]]First documented in 1987 during initial containment.[[/footnote]], including:
+
+* Periodic levitation up to 30cm above surfaces
+* Attraction of small metallic objects within a 1-meter radius
+* Emission of low-frequency vibrations detectable by specialized equipment
+
+**Addendum TEST-002-A:** Recovery Log
+
+SCP-TEST-002 was recovered from an abandoned warehouse in ████████, Ohio on ██/██/1987. Foundation agents were alerted after local reports of "floating metal balls" appeared in regional newspapers.
+
+**Addendum TEST-002-B:** Incident Report
+
+On ██/██/1995, SCP-TEST-002 exhibited previously unobserved behavior. The sphere began rotating rapidly and attracted all metallic objects within a 5-meter radius. The incident lasted approximately 3 minutes before the sphere returned to its dormant state.
+
+No personnel were injured during this incident.
+
+[[footnoteblock]]

@@ -1,6 +1,9 @@
 # Output directory (downloads, generated files, PDFs, etc.)
 output/
 
+# Test output (generated PDFs for inspection)
+tests/output/
+
 # Python cache
 __pycache__/
 *.pyc

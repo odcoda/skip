@@ -174,6 +174,9 @@ class EnhancedLaTeXConverter:
 % Experiment/log header
 \\newcommand{{\\logheader}}[1]{{\\textbf{{#1}}\\\\[0.3cm]}}
 
+% Redaction black box (for redacted text like dates and names)
+\\newcommand{{\\blackbox}}{{\\rule{{1ex}}{{1.2ex}}}}
+
 """
 
         # Add RPG styling if enabled
@@ -474,7 +477,7 @@ class EnhancedLaTeXConverter:
         """Escape special LaTeX characters"""
         if not text:
             return ""
-        
+
         # LaTeX special characters - order matters!
         replacements = [
             ('\\\\', '\\textbackslash{}'),
@@ -488,12 +491,14 @@ class EnhancedLaTeXConverter:
             ('}', '\\}'),
             ('~', '\\textasciitilde{}'),
             ('<', '\\textless{}'),
-            ('>', '\\textgreater{}')
+            ('>', '\\textgreater{}'),
+            # Unicode redaction characters - convert to black boxes
+            ('█', '\\blackbox{}'),
         ]
-        
+
         for char, replacement in replacements:
             text = text.replace(char, replacement)
-        
+
         return text
     
     def _generate_legacy_scp_section(self, doc) -> str:

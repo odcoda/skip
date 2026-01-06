@@ -1,0 +1,64 @@
+
+	[[>]]
+[[module Rate]]
+[[/>]]
+
+**Item #:** SCP-TEST-003
+
+**Object Class:** Keter
+
+**Special Containment Procedures:** Due to the nature of SCP-TEST-003, containment focuses on information suppression and rapid response protocols.
+
+**Description:** SCP-TEST-003 is an anomalous phenomenon affecting written communication. When specific patterns are written, they trigger temporary memory loss in readers.
+
+@@ @@
+----
+@@ @@
+
+**Addendum TEST-003-A:** Interview Log
+
+> **Interviewed:** Dr. Sarah Chen
+>
+> **Interviewer:** Agent Marcus Webb
+>
+> **Date:** ██/██/2015
+>
+> ----
+>
+> **<BEGIN LOG>**
+>
+> **Agent Webb:** Please describe what happened on the day of the incident.
+>
+> **Dr. Chen:** I was reviewing the documents in Lab 7. Around 14:00, I noticed something odd about the formatting.
+>
+> **Agent Webb:** Can you be more specific?
+>
+> **Dr. Chen:** The words seemed to... shift. Like they were rearranging themselves on the page.
+>
+> **Agent Webb:** And then?
+>
+> **Dr. Chen:** I don't remember. The next thing I knew, it was three hours later and I was in the medical bay.
+>
+> **(pause)**
+>
+> **Agent Webb:** Thank you, Dr. Chen. That will be all for now.
+>
+> **<END LOG>**
+
+@@ @@
+----
+@@ @@
+
+**Addendum TEST-003-B:** Research Notes
+
+> +++ Preliminary Findings
+>
+> Initial analysis suggests SCP-TEST-003 operates through a combination of visual and cognitive mechanisms:
+>
+> # Pattern recognition triggers an anomalous response in the brain
+> # The response causes temporary disruption of short-term memory formation
+> # Recovery typically occurs within 1-6 hours
+>
+> Further research is required to understand the full scope of SCP-TEST-003's effects.
+
+[[footnoteblock]]

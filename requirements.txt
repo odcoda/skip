@@ -16,3 +16,6 @@ pymupdf>=1.23.0
 
 # Optional: For better HTML parsing
 lxml>=4.9.0
+
+# Testing
+pytest>=7.0.0

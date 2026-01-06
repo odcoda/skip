@@ -1,0 +1,22 @@
+
+	[[>]]
+[[module Rate]]
+[[/>]]
+
+**Item #:** SCP-TEST-001
+
+**Object Class:** Safe
+
+**Special Containment Procedures:** SCP-TEST-001 is to be stored in a standard containment locker at Site-19. No special precautions are required.
+
+**Description:** SCP-TEST-001 is a wooden cube measuring 10cm on each side. When touched by a human, the cube emits a soft humming sound for approximately 30 seconds.
+
+Testing has revealed no harmful effects from exposure to SCP-TEST-001. The source of the humming sound remains unknown.
+
+[[footnoteblock]]
+
+[[div class="footer-wikiwalk-nav"]]
+[[=]]
+<< [[[SCP-TEST-000]]] | SCP-TEST-001 | [[[SCP-TEST-002]]] >>
+[[/=]]
+[[/div]]
