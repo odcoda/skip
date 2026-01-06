@@ -1,0 +1,18 @@
+# SCP Foundation Book Generator Dependencies
+
+# Web interface
+flask>=2.3.0
+
+# HTTP requests for downloading
+requests>=2.28.0
+beautifulsoup4>=4.11.0
+
+# PDF utilities (choose one)
+# Option 1: PyMuPDF (recommended - fast, no external dependencies)
+pymupdf>=1.23.0
+
+# Option 2: pdf2image (requires poppler installed)
+# pdf2image>=1.16.0
+
+# Optional: For better HTML parsing
+lxml>=4.9.0

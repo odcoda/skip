@@ -1,0 +1,1 @@
+# SCP LaTeX Book Generator
