@@ -24,12 +24,14 @@ Heritage Collection SCPs:
 
 import sys
 from pathlib import Path
+from typing import List
 
 # Add src to path
 SRC_DIR = Path(__file__).parent
 sys.path.insert(0, str(SRC_DIR))
 
 from pipeline.builder import SCPBookBuilder, PipelineConfig, OUTPUT_DIR
+from parsers.enhanced_wikidot_parser import EnhancedSCPDocument
 
 # Heritage Collection SCP numbers
 HERITAGE_COLLECTION = [
@@ -54,6 +56,24 @@ HERITAGE_METADATA = {
     "SCP-914": {"name": "The Clockworks", "class": "Safe"},
     "SCP-963": {"name": "Immortality", "class": "Safe"},
 }
+
+
+class HeritageCollectionBuilder(SCPBookBuilder):
+    """Builder that injects Heritage Collection metadata"""
+
+    def parse_all_files(self, file_list: List[str] = None) -> List[EnhancedSCPDocument]:
+        """Parse files and inject Heritage Collection metadata"""
+        documents = super().parse_all_files(file_list)
+
+        # Inject proper titles from Heritage Collection metadata
+        for doc in documents:
+            if doc.scp_number in HERITAGE_METADATA:
+                metadata = HERITAGE_METADATA[doc.scp_number]
+                doc.title = metadata["name"]
+                if not doc.object_class:
+                    doc.object_class = metadata["class"]
+
+        return documents
 
 
 def get_heritage_files() -> list:
@@ -97,8 +117,8 @@ def build_volume1():
         print(f"  - {Path(f).stem}")
     print()
 
-    # Build the book
-    builder = SCPBookBuilder(config)
+    # Build the book with Heritage Collection metadata
+    builder = HeritageCollectionBuilder(config)
     latex_file = builder.build_book(files)
 
     return latex_file

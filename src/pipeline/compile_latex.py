@@ -44,21 +44,24 @@ def compile_latex_to_pdf(latex_file, output_pdf_dir=None, build_dir=None):
     os.makedirs(output_pdf_dir, exist_ok=True)
     
     try:
-        # Run pdflatex with output directory specified
-        result = subprocess.run([
-            'pdflatex', 
-            '-interaction=nonstopmode',
-            f'-output-directory={build_dir}',
-            latex_filename
-        ],
-            cwd=latex_dir,
-            capture_output=True,
-            text=True,
-            timeout=120  # 2 minute timeout
-        )
-        
-        if result.returncode != 0:
-            return False, None, f"LaTeX compilation failed:\n{result.stdout}\n{result.stderr}"
+        # Run pdflatex twice for proper TOC generation
+        # First pass generates .aux file with TOC entries
+        # Second pass uses .aux file to populate TOC
+        for pass_num in range(2):
+            result = subprocess.run([
+                'pdflatex',
+                '-interaction=nonstopmode',
+                f'-output-directory={build_dir}',
+                latex_filename
+            ],
+                cwd=latex_dir,
+                capture_output=True,
+                text=True,
+                timeout=120  # 2 minute timeout
+            )
+
+            if result.returncode != 0:
+                return False, None, f"LaTeX compilation failed (pass {pass_num + 1}):\n{result.stdout}\n{result.stderr}"
         
         # Move PDF to final location
         pdf_file = latex_filename.replace('.tex', '.pdf')
