@@ -24,10 +24,17 @@ Built Volume 1: Heritage Collection (14 iconic SCPs from the 2013 Heritage Colle
 - Fixed LaTeX two-pass compilation for proper TOC generation
 - TOC now shows "SCP-055: [Unknown]", "SCP-682: Hard-to-Destroy Reptile", etc.
 
+**Related pages system:**
+- Created `data/related_pages.yaml` to track supplementary content per SCP
+- Fixed downloader to handle non-SCP page names (e.g., "document-087-i")
+- Downloaded SCP-087 exploration logs (documents I, II, III)
+- Note: Some pages fail with token auth errors (SCP-682 experiment log) - needs investigation
+
 **Up next:**
 - Improve chapter organization (single "Heritage Collection" chapter vs series split)
 - Add basic styling (fonts, spacing, decorative elements)
 - Handle images from SCP articles
+- Integrate related pages into book builds
 
 ## 2026-01-06 Test suite implementation
 
