@@ -79,10 +79,10 @@ class SCPDownloader:
     def get_page_info(self, url_or_id):
         """
         Get page information from a URL or SCP ID.
-        
+
         Args:
             url_or_id: Either a full URL or an SCP ID (e.g., "scp-5370" or just "5370")
-        
+
         Returns:
             Tuple of (page_id, page_unix_name)
         """
@@ -99,17 +99,23 @@ class SCPDownloader:
         else:
             # Non-SCP page name (e.g., "experiment-log-914")
             page_unix_name = url_or_id.lower()
-        
+
         # Get the page to extract the page_id
         url = f"https://scp-wiki.wikidot.com/{page_unix_name}"
         response = self.session.get(url)
         response.raise_for_status()
-        
+
+        # Extract wikidot_token7 from cookies (set when visiting any page)
+        for cookie in self.session.cookies:
+            if cookie.name == 'wikidot_token7':
+                self.wikidot_token7 = cookie.value
+                break
+
         # Extract page ID from HTML
         page_id_match = re.search(r'WIKIREQUEST\.info\.pageId\s*=\s*(\d+);', response.text)
         if not page_id_match:
             raise ValueError(f"Could not find page ID for {page_unix_name}")
-        
+
         page_id = page_id_match.group(1)
         return page_id, page_unix_name
     
