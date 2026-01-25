@@ -19,10 +19,15 @@ Built Volume 1: Heritage Collection (14 iconic SCPs from the 2013 Heritage Colle
 
 **Output:** `output/pdf/volume1_heritage_collection.pdf`
 
+**Subsequent improvements:**
+- Added SCP names to TOC (via HeritageCollectionBuilder metadata injection)
+- Fixed LaTeX two-pass compilation for proper TOC generation
+- TOC now shows "SCP-055: [Unknown]", "SCP-682: Hard-to-Destroy Reptile", etc.
+
 **Up next:**
-- Add SCP names/titles to table of contents
-- Improve title page with subtitle
-- Add basic styling (fonts, spacing)
+- Improve chapter organization (single "Heritage Collection" chapter vs series split)
+- Add basic styling (fonts, spacing, decorative elements)
+- Handle images from SCP articles
 
 ## 2026-01-06 Test suite implementation
 
