@@ -8,18 +8,22 @@
 #
 # Format:
 #   SCP-XXX:
+#     status: reviewed|pending|downloaded
 #     include:
 #       - page-name: reason for inclusion
 #     exclude:
 #       - page-name: reason for exclusion
 #     notes: any special considerations
 #
-# Status: reviewed = manually verified, pending = needs human review
+# Status meanings:
+#   reviewed = manually verified, no related pages needed
+#   pending = needs human review
+#   downloaded = related pages have been downloaded
 
 # Heritage Collection (Volume 1)
 
 SCP-055:
-  status: pending
+  status: reviewed
   include: []
   exclude:
     - we-need-to-talk-about-fifty-five: story, not essential to understanding object
@@ -32,11 +36,11 @@ SCP-076:
   notes: Contains extensive inline documentation about Able and Project Omega
 
 SCP-087:
-  status: pending
+  status: downloaded
   include:
-    - document-087-i: exploration log 1
-    - document-087-ii: exploration log 2
-    - document-087-iii: exploration log 3
+    - document-087-i: exploration log 1 (90 lines)
+    - document-087-ii: exploration log 2 (115 lines)
+    - document-087-iii: exploration log 3 (74 lines)
   exclude: []
   notes: Exploration logs are essential - they ARE the article's substance
 
@@ -79,19 +83,21 @@ SCP-500:
   notes: Self-contained article about the Panacea pills
 
 SCP-682:
-  status: pending
+  status: downloaded
   include:
-    - experiment-log-t-98816-oc108-682: termination attempts log (essential!)
+    - experiment-log-t-98816-oc108-682: termination attempts (2768 lines!)
   exclude: []
-  notes: The experiment log is famous and should definitely be included
+  notes: |
+    The termination log is famous and essential. Contains attempts using
+    SCP-017, SCP-063, SCP-162, and many more. Very long but important.
 
 SCP-701:
-  status: pending
+  status: downloaded
   include:
-    - incident-report-scp70119971: incident report
-    - scp7011640b1: additional documentation
+    - incident-report-scp70119971: incident report (72 lines)
+    - scp7011640b1: additional documentation (61 lines)
   exclude: []
-  notes: Need to verify these are essential to understanding the play
+  notes: Incident reports provide context for the play's effects
 
 SCP-882:
   status: reviewed
@@ -101,16 +107,18 @@ SCP-882:
 
 SCP-914:
   status: pending
-  include:
-    - experiment-log-914-hub: THE famous experiment log (essential!)
-  exclude: []
+  include: []
+  exclude:
+    - experiment-log-914-hub: facility dossier, not actual experiment logs
   notes: |
-    The experiment log is extremely long and a major part of the article's appeal.
-    May need to select representative experiments rather than all of them.
+    The experiment-log-914-hub is actually a Site-19 Facility 23 dossier page,
+    not the famous experiment logs. The actual SCP-914 experiment logs are
+    community-contributed and spread across multiple sandbox pages. May need
+    special handling or selection of representative experiments.
 
 SCP-963:
-  status: pending
+  status: downloaded
   include:
-    - routine-psychological-evaluations-by-dr-glass: Dr. Bright evaluations
+    - routine-psychological-evaluations-by-dr-glass: Dr. Bright evaluations (168 lines)
   exclude: []
   notes: The psychological evaluations add depth to Dr. Bright's character
