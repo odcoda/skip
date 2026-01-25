@@ -27,8 +27,13 @@ Built Volume 1: Heritage Collection (14 iconic SCPs from the 2013 Heritage Colle
 **Related pages system:**
 - Created `data/related_pages.yaml` to track supplementary content per SCP
 - Fixed downloader to handle non-SCP page names (e.g., "document-087-i")
-- Downloaded SCP-087 exploration logs (documents I, II, III)
-- Note: Some pages fail with token auth errors (SCP-682 experiment log) - needs investigation
+- Fixed token extraction bug (cookie set on page visit, not main page)
+- Downloaded all key related pages:
+  - SCP-087: 3 exploration logs (279 lines)
+  - SCP-682: termination log (2768 lines!)
+  - SCP-701: incident reports (133 lines)
+  - SCP-963: Dr. Bright evaluations (168 lines)
+- Note: SCP-914's experiment logs need special handling (spread across sandbox pages)
 
 **Up next:**
 - Improve chapter organization (single "Heritage Collection" chapter vs series split)
