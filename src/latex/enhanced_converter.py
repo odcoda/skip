@@ -46,9 +46,13 @@ class EnhancedLaTeXConverter:
     def generate_document_latex(self, document: EnhancedSCPDocument) -> str:
         """Generate LaTeX content for a single SCP document (without preamble)"""
         latex = ""
-        
-        # Add SCP number and title
-        latex += f"\\section{{{document.scp_number}: {self._escape_latex(document.title)}}}\n\n"
+
+        # Clean and add SCP number and title
+        clean_title = self._clean_wikidot_title(document.title)
+        if clean_title:
+            latex += f"\\section{{{document.scp_number}: {self._escape_latex(clean_title)}}}\n\n"
+        else:
+            latex += f"\\section{{{document.scp_number}}}\n\n"
         
         # Add object class if available
         if document.object_class and document.object_class.strip():
@@ -158,10 +162,10 @@ class EnhancedLaTeXConverter:
 \\definecolor{{scpred}}{{RGB}}{{187, 0, 0}}
 \\definecolor{{scpgray}}{{RGB}}{{102, 102, 102}}
 
-% Quote block environment
+% Quote block environment (simple indented block)
 \\newenvironment{{scpquote}}
-{{\\begin{{adjustwidth}}{{0.5cm}}{{0.5cm}}\\begin{{leftbar}}\\small}}
-{{\\end{{leftbar}}\\end{{adjustwidth}}}}
+{{\\begin{{adjustwidth}}{{1cm}}{{1cm}}\\small\\itshape}}
+{{\\upshape\\end{{adjustwidth}}\\vspace{{0.3cm}}}}
 
 % Dialogue environment
 \\newenvironment{{scpdialogue}}
@@ -473,10 +477,90 @@ class EnhancedLaTeXConverter:
         text = re.sub(r'\n\n+', '\n\n', text)
         return text
     
+    def _clean_wikidot_title(self, title: str) -> str:
+        """Clean wikidot markup from titles"""
+        if not title:
+            return ""
+
+        # Remove [[include ...]] tags (including multi-line)
+        title = re.sub(r'\[\[include\s+[^\]]*\]\]', '', title, flags=re.IGNORECASE | re.DOTALL)
+
+        # Remove partial [[include tags (when title gets truncated mid-tag)
+        title = re.sub(r'\[\[include\s+.*', '', title, flags=re.IGNORECASE | re.DOTALL)
+
+        # Remove [[module ...]] tags
+        title = re.sub(r'\[\[module[^\]]*\]\]', '', title, flags=re.IGNORECASE)
+
+        # Remove [[size ...]]...[[/size]] hidden text
+        title = re.sub(r'\[\[size\s+0%?\]\].*?\[\[/size\]\]', '', title, flags=re.DOTALL)
+
+        # Remove [[>]] alignment and similar
+        title = re.sub(r'\[\[/?>\]\]', '', title)
+
+        # Remove other [[...]] tags
+        title = re.sub(r'\[\[[^\]]*\]\]', '', title)
+
+        # Remove anything starting with [[ (incomplete tags)
+        title = re.sub(r'\[\[.*', '', title, flags=re.DOTALL)
+
+        # Clean up whitespace
+        title = ' '.join(title.split())
+
+        return title.strip()
+
+    def _clean_wikidot_content(self, text: str) -> str:
+        """Clean wikidot markup from content"""
+        if not text:
+            return ""
+
+        # Remove [[size 0%]]...[[/size]] hidden text
+        text = re.sub(r'\[\[size\s+0%?\]\].*?\[\[/size\]\]', '', text, flags=re.DOTALL)
+
+        # Remove [[>]] and [[/>]] alignment tags
+        text = re.sub(r'\[\[>?\]\]', '', text)
+        text = re.sub(r'\[\[/>\]\]', '', text)
+
+        # Remove [[include component:image-block ...]] (for now, handle images later)
+        text = re.sub(r'\[\[include\s+component:image-block[^\]]*\]\]', '[Image]', text, flags=re.IGNORECASE)
+
+        # Remove other [[include ...]] tags
+        text = re.sub(r'\[\[include[^\]]*\]\]', '', text, flags=re.IGNORECASE)
+
+        # Remove [[collapsible ...]]...[[/collapsible]] - keep the content
+        text = re.sub(r'\[\[collapsible[^\]]*\]\]', '', text, flags=re.IGNORECASE)
+        text = re.sub(r'\[\[/collapsible\]\]', '', text, flags=re.IGNORECASE)
+
+        # Remove [[*user Username]] and [[user Username]] - replace with just username
+        text = re.sub(r'\[\[\*?user\s+([^\]]+)\]\]', r'\1', text, flags=re.IGNORECASE)
+
+        # Remove [[span ...]]...[[/span]]
+        text = re.sub(r'\[\[span[^\]]*\]\]', '', text, flags=re.IGNORECASE)
+        text = re.sub(r'\[\[/span\]\]', '', text, flags=re.IGNORECASE)
+
+        # Remove [[div ...]]...[[/div]]
+        text = re.sub(r'\[\[div[^\]]*\]\]', '', text, flags=re.IGNORECASE)
+        text = re.sub(r'\[\[/div\]\]', '', text, flags=re.IGNORECASE)
+
+        # Remove [[footnote]]...[[/footnote]] - handle footnotes separately
+        text = re.sub(r'\[\[footnote\]\](.*?)\[\[/footnote\]\]', r' [note: \1]', text, flags=re.DOTALL)
+
+        # Remove [[[link|text]]] wiki links - keep the text
+        text = re.sub(r'\[\[\[([^\]|]+)\|([^\]]+)\]\]\]', r'\2', text)
+        text = re.sub(r'\[\[\[([^\]]+)\]\]\]', r'\1', text)
+
+        # Remove [http://... text] external links - keep the text
+        text = re.sub(r'\[https?://[^\s\]]+\s+([^\]]+)\]', r'\1', text)
+        text = re.sub(r'\[https?://[^\]]+\]', '[link]', text)
+
+        return text
+
     def _escape_latex(self, text: str) -> str:
         """Escape special LaTeX characters"""
         if not text:
             return ""
+
+        # First clean wikidot markup
+        text = self._clean_wikidot_content(text)
 
         # LaTeX special characters - order matters!
         replacements = [
@@ -494,6 +578,14 @@ class EnhancedLaTeXConverter:
             ('>', '\\textgreater{}'),
             # Unicode redaction characters - convert to black boxes
             ('█', '\\blackbox{}'),
+            # Greek letters commonly seen
+            ('ρ', '$\\rho$'),
+            ('α', '$\\alpha$'),
+            ('β', '$\\beta$'),
+            ('γ', '$\\gamma$'),
+            ('δ', '$\\delta$'),
+            ('π', '$\\pi$'),
+            ('Ω', '$\\Omega$'),
         ]
 
         for char, replacement in replacements:

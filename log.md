@@ -1,5 +1,29 @@
 # Development Log
 
+## 2026-01-25 Volume 1 first build complete
+
+Built Volume 1: Heritage Collection (14 iconic SCPs from the 2013 Heritage Collection)
+
+**Key achievements:**
+- Installed PyMuPDF for PDF-to-image conversion (enables visual layout debugging)
+- Created `src/tools/pdf_viewer.py` for converting PDF pages to images
+- Created `src/build_volume1.py` for building Volume 1 specifically
+- Fixed LaTeX converter issues:
+  - Cleaned [[include...]] tags from section titles
+  - Fixed scpquote environment (removed broken leftbar dependency)
+  - Added Unicode support (Greek letters)
+  - Cleaned wikidot markup from content (collapsible, user links, spans, etc.)
+- Successfully generated 32-page PDF (326KB)
+
+**Heritage Collection articles:** SCP-055, 076, 087, 093, 173, 231, 239, 343, 500, 682, 701, 882, 914, 963
+
+**Output:** `output/pdf/volume1_heritage_collection.pdf`
+
+**Up next:**
+- Add SCP names/titles to table of contents
+- Improve title page with subtitle
+- Add basic styling (fonts, spacing)
+
 ## 2026-01-06 Test suite implementation
 
 Added pytest-based test suite with synthetic fixtures:
