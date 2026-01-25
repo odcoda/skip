@@ -106,15 +106,36 @@ SCP-882:
   notes: Self-contained article about A Machine (Church of the Broken God)
 
 SCP-914:
-  status: pending
-  include: []
+  status: downloaded
+  include:
+    # 21 fragment pages totaling 50,622 lines of experiments
+    - fragment:experiment-log-914-001: experiment log part 1 (downloaded as experiment-log-914-fragment-01.txt)
+    - fragment:experiment-log-914-002: experiment log part 2
+    - fragment:experiment-log-914-003: experiment log part 3
+    - fragment:experiment-log-914-004: experiment log part 4
+    - fragment:experiment-log-914-005: experiment log part 5
+    - fragment:experiment-log-914-006: experiment log part 6
+    - fragment:experiment-log-914-007: experiment log part 7
+    - fragment:experiment-log-914-008: experiment log part 8
+    - fragment:experiment-log-914-009: experiment log part 9
+    - fragment:experiment-log-914-010: experiment log part 10
+    - fragment:experiment-log-914-011: experiment log part 11
+    - fragment:experiment-log-914-012: experiment log part 12
+    - fragment:experiment-log-914-013: experiment log part 13
+    - fragment:experiment-log-914-014: experiment log part 14
+    - fragment:experiment-log-914-015: experiment log part 15
+    - fragment:experiment-log-914-016: experiment log part 16
+    - fragment:experiment-log-914-017: experiment log part 17
+    - fragment:experiment-log-914-018: experiment log part 18
+    - fragment:experiment-log-914-019: experiment log part 19
+    - fragment:experiment-log-914-020: experiment log part 20
+    - fragment:experiment-log-914-021: experiment log part 21
   exclude:
-    - experiment-log-914-hub: facility dossier, not actual experiment logs
+    - experiment-log-914-hub: facility dossier page (contains links to fragments)
   notes: |
-    The experiment-log-914-hub is actually a Site-19 Facility 23 dossier page,
-    not the famous experiment logs. The actual SCP-914 experiment logs are
-    community-contributed and spread across multiple sandbox pages. May need
-    special handling or selection of representative experiments.
+    The famous SCP-914 experiment logs - 50,622 lines across 21 fragments!
+    Downloaded as experiment-log-914-fragment-01.txt through -21.txt.
+    May want to select representative experiments for the book rather than all.
 
 SCP-963:
   status: downloaded
