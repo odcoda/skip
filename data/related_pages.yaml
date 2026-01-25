@@ -1,0 +1,116 @@
+# Related Pages Index
+#
+# This file tracks which supplementary pages should be included with each SCP article.
+#
+# Guidelines (from GOALS.md):
+#   INCLUDE: experiment logs, exploration logs, destruction attempts
+#   EXCLUDE: cross-links to other SCPs, lists, stories (usually), hubs, tag pages
+#
+# Format:
+#   SCP-XXX:
+#     include:
+#       - page-name: reason for inclusion
+#     exclude:
+#       - page-name: reason for exclusion
+#     notes: any special considerations
+#
+# Status: reviewed = manually verified, pending = needs human review
+
+# Heritage Collection (Volume 1)
+
+SCP-055:
+  status: pending
+  include: []
+  exclude:
+    - we-need-to-talk-about-fifty-five: story, not essential to understanding object
+  notes: The article itself is self-contained
+
+SCP-076:
+  status: reviewed
+  include: []
+  exclude: []
+  notes: Contains extensive inline documentation about Able and Project Omega
+
+SCP-087:
+  status: pending
+  include:
+    - document-087-i: exploration log 1
+    - document-087-ii: exploration log 2
+    - document-087-iii: exploration log 3
+  exclude: []
+  notes: Exploration logs are essential - they ARE the article's substance
+
+SCP-093:
+  status: reviewed
+  include: []
+  exclude: []
+  notes: Contains extensive inline exploration logs (Red/Green/Violet/Blue/Yellow tests)
+
+SCP-173:
+  status: reviewed
+  include: []
+  exclude: []
+  notes: The original SCP, self-contained
+
+SCP-231:
+  status: reviewed
+  include: []
+  exclude:
+    - dust-and-blood: story hub
+    - kte-2013-kapala-mendes: GOC cross-reference
+  notes: Article is self-contained, related content is supplementary lore
+
+SCP-239:
+  status: reviewed
+  include: []
+  exclude: []
+  notes: Self-contained article about the Witch Child
+
+SCP-343:
+  status: reviewed
+  include: []
+  exclude: []
+  notes: Self-contained article about "God"
+
+SCP-500:
+  status: reviewed
+  include: []
+  exclude: []
+  notes: Self-contained article about the Panacea pills
+
+SCP-682:
+  status: pending
+  include:
+    - experiment-log-t-98816-oc108-682: termination attempts log (essential!)
+  exclude: []
+  notes: The experiment log is famous and should definitely be included
+
+SCP-701:
+  status: pending
+  include:
+    - incident-report-scp70119971: incident report
+    - scp7011640b1: additional documentation
+  exclude: []
+  notes: Need to verify these are essential to understanding the play
+
+SCP-882:
+  status: reviewed
+  include: []
+  exclude: []
+  notes: Self-contained article about A Machine (Church of the Broken God)
+
+SCP-914:
+  status: pending
+  include:
+    - experiment-log-914-hub: THE famous experiment log (essential!)
+  exclude: []
+  notes: |
+    The experiment log is extremely long and a major part of the article's appeal.
+    May need to select representative experiments rather than all of them.
+
+SCP-963:
+  status: pending
+  include:
+    - routine-psychological-evaluations-by-dr-glass: Dr. Bright evaluations
+  exclude: []
+  notes: The psychological evaluations add depth to Dr. Bright's character
