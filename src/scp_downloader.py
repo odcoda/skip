@@ -93,9 +93,12 @@ class SCPDownloader:
             page_unix_name = path.strip('/').split('/')[-1]
         elif url_or_id.lower().startswith('scp-'):
             page_unix_name = url_or_id.lower()
-        else:
-            # Assume it's just the number
+        elif url_or_id.isdigit():
+            # Pure number - assume SCP article
             page_unix_name = f"scp-{url_or_id}"
+        else:
+            # Non-SCP page name (e.g., "experiment-log-914")
+            page_unix_name = url_or_id.lower()
         
         # Get the page to extract the page_id
         url = f"https://scp-wiki.wikidot.com/{page_unix_name}"
