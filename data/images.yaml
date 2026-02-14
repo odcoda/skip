@@ -1,0 +1,115 @@
+# Image Index for SCP Articles
+#
+# This file tracks images associated with each SCP article.
+# Images are downloaded and stored in output/images/
+#
+# For some SCPs (173, 682, 914, 882), the original iconic images cannot be
+# included due to copyright/licensing. These entries note where to find
+# replacement images.
+#
+# Format:
+#   SCP-XXX:
+#     images:
+#       - filename: image filename from wikidot
+#         url: download URL (if available)
+#         caption: image caption
+#         notes: licensing issues, replacement needed, etc.
+
+SCP-055:
+  images: []
+  notes: No images (part of the joke - you can't remember it)
+
+SCP-076:
+  images: []
+  notes: No images in main article
+
+SCP-087:
+  images:
+    - filename: 087stair.png
+      url: https://scp-wiki.wdfiles.com/local--files/scp-087/087stair.png
+      caption: The Stairwell
+      notes: JavaScript switches this to 087stairface.png on hover
+    - filename: 087stairface.png
+      url: https://scp-wiki.wdfiles.com/local--files/scp-087/087stairface.png
+      caption: The Stairwell with face visible
+    - filename: 087face.jpg
+      url: http://scp-wiki.wdfiles.com/local--files/scp-087/087face.jpg
+      caption: "Figure B: SCP-087-1; Enhanced image from still taken from Exploration I"
+
+SCP-093:
+  images: []
+  notes: No images (exploration logs are text-based)
+
+SCP-173:
+  images:
+    - filename: scp-173-original.jpg
+      url: null
+      caption: SCP-173
+      notes: |
+        ORIGINAL IMAGE REMOVED due to licensing (Untitled 2004 by Izumi Kato).
+        The original article had no image. Need to find appropriate replacement.
+        Search "SCP-173 sculpture" for fan art alternatives.
+
+SCP-231:
+  images:
+    - filename: scp-blank.png
+      url: https://scp-wiki.wdfiles.com/local--files/scp-231/scp-blank.png
+      caption: Image removed by order of O5-██
+      notes: Intentionally blank/redacted image (part of the article's mystery)
+
+SCP-239:
+  images: []
+  notes: No images in article
+
+SCP-343:
+  images: []
+  notes: No images (God doesn't need a photo)
+
+SCP-500:
+  images: []
+  notes: No images
+
+SCP-682:
+  images:
+    - filename: monster8editub9-new.jpg
+      url: http://scp-wiki.wdfiles.com/local--files/scp-682/monster8editub9-new.jpg
+      caption: SCP-682 shortly after escaping from containment, still recovering from acid immersion
+      notes: |
+        REPLACEMENT IMAGE - original iconic crocodile skull photo had licensing issues.
+        Current image is a placeholder. Search for better SCP-682 fan art.
+
+SCP-701:
+  images:
+    - filename: Volgun701.jpg
+      url: http://scp-wiki.wdfiles.com/local--files/scp-701/Volgun701.jpg
+      caption: SCP-701-1 in a still image from SCP-701-19██-A
+      width: 250px
+
+SCP-882:
+  images:
+    - filename: Gears2.jpg
+      url: http://scp-wiki.wdfiles.com/local--files/scp-882/Gears2.jpg
+      caption: SCP-882
+      notes: |
+        REPLACEMENT IMAGE - original had licensing issues.
+        Current is generic gears photo. Search for better mechanical horror imagery.
+
+SCP-914:
+  images:
+    - filename: gears.jpg
+      url: http://scp-wiki.wdfiles.com/local--files/scp-914/gears.jpg
+      caption: One of the least complex sections of SCP-914 in a non-active state
+      width: 200px
+      notes: |
+        REPLACEMENT IMAGE - original clockwork device photo had licensing issues.
+        Current is generic gears. Search for ornate clockwork machinery images.
+
+SCP-963:
+  images:
+    - filename: 963ccc_small.jpg
+      url: http://scp-wiki.wdfiles.com/local--files/scp-963/963ccc_small.jpg
+      caption: SCP-963-1, without a donor
+    - filename: 2ni6vxu.jpg
+      url: http://scp-wiki.wdfiles.com/local--files/scp-963/2ni6vxu.jpg
+      caption: SCP-963-2, shown here [DATA EXPUNGED]
+      align: center

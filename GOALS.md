@@ -45,3 +45,16 @@ scripts in the future. But we will need to work out which related pages go
 with which each article by hand. Humans will sometimes need to make
 corrections here too so make sure the format is easy for both humans and
 machines to edit.
+
+## Multimedia
+
+Articles can have embedded images, video, or audio; be sure to preserve
+the images at least when downloading and constructing the book.
+
+For a few articles the images in the article are new or missing, because
+there are famous original images that cannot be included for various
+copyright / licensing reasons. In these cases you can search online briefly
+and find the original image. A short list of such cases includes SCP-173,
+SCP-682, SCP-914, SCP-882. Let's have a place where we can list more such
+cases manually as we discover them, and override their URLs to the locations
+we find by searching online.
