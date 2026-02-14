@@ -14,10 +14,11 @@ from parsers.enhanced_wikidot_parser import EnhancedSCPDocument, ContentBlock, S
 
 class EnhancedLaTeXConverter:
     """Converts enhanced SCP documents to LaTeX with semantic formatting"""
-    
-    def __init__(self, config):
+
+    def __init__(self, config, image_map=None):
         self.config = config
         self.footnote_counter = 0
+        self.image_map = image_map or {}  # SCP number -> list of image info dicts
         
     def generate_book(self, chapters: List[Dict[str, Any]]) -> str:
         """Generate complete LaTeX book from organized chapters"""
@@ -54,10 +55,15 @@ class EnhancedLaTeXConverter:
         else:
             latex += f"\\section{{{document.scp_number}}}\n\n"
         
+        # Add image if available (float right, before content)
+        images = self.image_map.get(document.scp_number, [])
+        if images:
+            latex += self._generate_image_latex(images[0], document.scp_number)
+
         # Add object class if available
         if document.object_class and document.object_class.strip():
             latex += f"\\textbf{{Object Class:}} {self._escape_latex(document.object_class)}\n\n"
-        
+
         # Process each section
         for section in document.sections:
             latex += self._generate_section_latex(section)
@@ -420,6 +426,28 @@ class EnhancedLaTeXConverter:
         latex += "\\end{tabular}"
         return latex
     
+    def _generate_image_latex(self, image_info: dict, scp_number: str) -> str:
+        """Generate LaTeX for an SCP image, floated right"""
+        filename = image_info.get('filename', '')
+        caption = image_info.get('caption', '')
+        scp_slug = scp_number.lower().replace('-', '-')  # e.g. "SCP-087" -> "scp-087"
+
+        # Build path relative to the latex directory
+        # Images are in output/images/scp-XXX/filename
+        # LaTeX articles are in output/latex/volume1/articles/
+        # So relative path is ../../../images/scp-XXX/filename
+        img_path = f"../../../images/{scp_slug}/{filename}"
+
+        latex = "\\begin{wrapfigure}{r}{0.4\\textwidth}\n"
+        latex += "  \\centering\n"
+        latex += f"  \\includegraphics[width=0.38\\textwidth]{{{img_path}}}\n"
+        if caption:
+            clean_caption = self._escape_latex(caption)
+            latex += f"  \\caption*{{\\small {clean_caption}}}\n"
+        latex += "\\end{wrapfigure}\n\n"
+
+        return latex
+
     def _generate_include_latex(self, block: ContentBlock) -> str:
         """Generate LaTeX for include blocks (placeholders for now)"""
         

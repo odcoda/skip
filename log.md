@@ -35,10 +35,18 @@ Built Volume 1: Heritage Collection (14 iconic SCPs from the 2013 Heritage Colle
   - SCP-963: Dr. Bright evaluations (168 lines)
 - Note: SCP-914's experiment logs need special handling (spread across sandbox pages)
 
+**Images:**
+- Created `data/images.yaml` tracking all images per SCP
+- Downloaded 10 images from wdfiles.com into `output/images/<scp>/`
+- SCPs with images: 087 (3), 231 (1), 682 (1), 701 (1), 882 (1), 914 (1), 963 (2)
+- SCPs needing original images found online: 173, 682, 882, 914
+- SCP-173's original is "Untitled 2004" by Izumi Kato (removed from wiki)
+
 **Up next:**
-- Improve chapter organization (single "Heritage Collection" chapter vs series split)
-- Add basic styling (fonts, spacing, decorative elements)
-- Handle images from SCP articles
+- Integrate images into PDF
+- Find original/iconic images for 173, 682, 882, 914
+- Improve chapter organization
+- Add basic styling
 - Integrate related pages into book builds
 
 ## 2026-01-06 Test suite implementation

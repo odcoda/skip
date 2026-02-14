@@ -165,11 +165,34 @@ class SCPBookBuilder:
         
         return chapters
     
+    def load_image_map(self) -> Dict[str, list]:
+        """Load image mappings from data/images.yaml"""
+        import yaml
+        images_yaml = PROJECT_ROOT / "data" / "images.yaml"
+        if not images_yaml.exists():
+            return {}
+        with open(images_yaml, 'r') as f:
+            data = yaml.safe_load(f) or {}
+        image_map = {}
+        for scp_key, info in data.items():
+            images = info.get('images', [])
+            # Filter to images that actually exist on disk
+            existing = []
+            for img in images:
+                if img.get('url') and img.get('filename'):
+                    img_path = OUTPUT_DIR / "images" / scp_key.lower() / img['filename']
+                    if img_path.exists():
+                        existing.append(img)
+            if existing:
+                image_map[scp_key.upper().replace('SCP', 'SCP')] = existing
+        return image_map
+
     def generate_individual_latex_files(self, documents: List[EnhancedSCPDocument]) -> Dict[str, str]:
         """Generate individual LaTeX files for each SCP document"""
         from latex.enhanced_converter import EnhancedLaTeXConverter
 
-        converter = EnhancedLaTeXConverter(self.config)
+        image_map = self.load_image_map()
+        converter = EnhancedLaTeXConverter(self.config, image_map=image_map)
         latex_files = {}
 
         # Create latex/articles directory
