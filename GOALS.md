@@ -58,3 +58,25 @@ and find the original image. A short list of such cases includes SCP-173,
 SCP-682, SCP-914, SCP-882. Let's have a place where we can list more such
 cases manually as we discover them, and override their URLs to the locations
 we find by searching online.
+
+## Formatting
+
+The articles should be beautiful, creative, and attractive to look at in print.
+The types of styling should be similar to that of an RPG sourcebook, but
+instead of being traditional-fantasy themed it should match the themes of the
+SCP foundation -- modern, speculative, conspiratorial, mysterious. We'll
+eventually want a variety of themes for different pages and segments, but for
+now let's focus on completing a single one. Later it will be easy to swap out
+some of the components for others. Things to consider include colors, fonts,
+background colors and gradients, heading sizes and shapes, background images,
+text box placement, text box overlays, margin images on the sides/top/bottom,
+heading and page number styling, etc.
+
+All themes should be implemented directly in latex. For images, feel free to
+download clip art or construct your own with svg graphics. Don't use AI image
+generators yet.
+
+Make sure the generation process makes it easy for humans to change parts of
+a theme, apply a different theme to different pages / articles / documents, or
+or override intermediate details of the generated latex if needed. (We will
+probably need a variety of "spot fixes" to make things look pretty).
