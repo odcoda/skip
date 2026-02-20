@@ -1,0 +1,335 @@
+% redacted.sty — "REDACTED" classified-document theme for SCP books
+% Government dossier / conspiracy aesthetic: monospace headers, red accents,
+% classification stamps, typed-document feel.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{redacted}[2026/02/20 SCP REDACTED classified-document theme]
+
+% Load base layer
+\RequirePackage{scpbase}
+
+% ─── Additional packages ─────────────────────────────────────────────
+\RequirePackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\RequirePackage{tikz}
+\usetikzlibrary{calc,positioning}
+\RequirePackage{courier}       % Courier monospace
+\RequirePackage{helvet}        % Helvetica sans-serif
+\RequirePackage{titlesec}      % Section title formatting
+\RequirePackage{etoolbox}      % Patching commands
+\RequirePackage{afterpage}
+
+% ─── Color palette ───────────────────────────────────────────────────
+% Override/extend base colors
+\definecolor{scpred}{RGB}{187,0,0}
+\definecolor{scpblack}{RGB}{20,20,20}
+\definecolor{scpgray}{RGB}{102,102,102}
+\definecolor{scplightgray}{RGB}{240,240,240}
+\definecolor{scppaper}{RGB}{252,250,245}
+\definecolor{scpyellow}{RGB}{255,200,0}
+\definecolor{scpstamp}{RGB}{200,0,0}
+\definecolor{scpdarkred}{RGB}{120,0,0}
+
+% ─── Page geometry ───────────────────────────────────────────────────
+\geometry{
+  letterpaper,
+  inner=0.85in,
+  outer=1.25in,
+  top=1in,
+  bottom=1in,
+  headheight=15pt
+}
+
+% Page background tint
+\pagecolor{scppaper}
+
+% ─── Typography ──────────────────────────────────────────────────────
+% Body: Latin Modern serif (already loaded by scpbase)
+% Sans: Helvetica for labels
+% Mono: Courier for headers and dialogue
+
+% ─── Headers and footers ────────────────────────────────────────────
+\fancyhf{}
+\fancyhead[LO]{%
+  \footnotesize\sffamily\color{scpgray}%
+  CLASSIFIED \textendash{} LEVEL 4%
+}
+\fancyhead[RE]{%
+  \footnotesize\sffamily\color{scpgray}%
+  CLASSIFIED \textendash{} LEVEL 4%
+}
+\fancyhead[RO,LE]{%
+  \footnotesize\sffamily\color{scpgray}%
+  SCP FOUNDATION ARCHIVE%
+}
+\fancyfoot[C]{%
+  \footnotesize\sffamily\color{scpgray}%
+  \thepage%
+}
+\fancyfoot[LO,RE]{%
+  \scriptsize\sffamily\color{scpgray!60}%
+  UNAUTHORIZED ACCESS PROHIBITED%
+}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Red rule under header
+\renewcommand{\headrule}{%
+  \vspace{2pt}%
+  {\color{scpred}\hrule height 0.8pt}%
+}
+
+% Plain page style (chapter openers)
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \fancyfoot[C]{\footnotesize\sffamily\color{scpgray}\thepage}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0pt}%
+}
+
+% ─── Chapter titles ──────────────────────────────────────────────────
+\titleformat{\chapter}[display]
+  {\normalfont\Huge\ttfamily\bfseries\color{scpblack}}
+  {\MakeUppercase{\chaptertitlename}\ \thechapter}
+  {10pt}
+  {\color{scpred}\titlerule[2pt]\vspace{6pt}\MakeUppercase}
+\titlespacing*{\chapter}{0pt}{-20pt}{30pt}
+
+% ─── Section titles (SCP numbers) ───────────────────────────────────
+\titleformat{\section}
+  {\normalfont\Large\bfseries\ttfamily\color{scpblack}}
+  {}
+  {0pt}
+  {}
+  [\vspace{2pt}{\color{scpred}\titlerule[1.5pt]}\vspace{4pt}]
+
+% ─── Subsection titles (Containment, Description, etc.) ─────────────
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\sffamily\color{scpblack}\MakeUppercase}
+  {}
+  {0pt}
+  {}
+
+% ─── Override semantic commands ──────────────────────────────────────
+
+% Containment procedures — tcolorbox with red left bar
+\renewcommand{\containment}{%
+  \vspace{6pt}%
+  \begin{tcolorbox}[
+    enhanced,
+    breakable,
+    colback=scplightgray,
+    colframe=scplightgray,
+    boxrule=0pt,
+    borderline west={3pt}{0pt}{scpred},
+    sharp corners,
+    left=8pt, right=6pt, top=4pt, bottom=4pt,
+    fontupper=\sffamily\small
+  ]%
+  \textbf{\MakeUppercase{Special Containment Procedures}}%
+  \end{tcolorbox}%
+  \vspace{2pt}%
+}
+
+% Description — tcolorbox with red left bar
+\renewcommand{\scpdescription}{%
+  \vspace{6pt}%
+  \begin{tcolorbox}[
+    enhanced,
+    breakable,
+    colback=scplightgray,
+    colframe=scplightgray,
+    boxrule=0pt,
+    borderline west={3pt}{0pt}{scpred},
+    sharp corners,
+    left=8pt, right=6pt, top=4pt, bottom=4pt,
+    fontupper=\sffamily\small
+  ]%
+  \textbf{\MakeUppercase{Description}}%
+  \end{tcolorbox}%
+  \vspace{2pt}%
+}
+
+% Addendum — tcolorbox with red left bar
+\renewcommand{\addendum}[1]{%
+  \vspace{6pt}%
+  \begin{tcolorbox}[
+    enhanced,
+    breakable,
+    colback=scplightgray,
+    colframe=scplightgray,
+    boxrule=0pt,
+    borderline west={3pt}{0pt}{scpred},
+    sharp corners,
+    left=8pt, right=6pt, top=4pt, bottom=4pt,
+    fontupper=\sffamily\small
+  ]%
+  \textbf{\MakeUppercase{Addendum #1}}%
+  \end{tcolorbox}%
+  \vspace{2pt}%
+}
+
+% Object class — red boxed label
+\renewcommand{\objectclass}[1]{%
+  \vspace{4pt}%
+  \noindent
+  \begin{tcolorbox}[
+    enhanced,
+    colback=white,
+    colframe=scpred,
+    boxrule=1pt,
+    sharp corners,
+    left=6pt, right=6pt, top=2pt, bottom=2pt,
+    width=0.5\textwidth,
+    fontupper=\sffamily\small
+  ]%
+  \textbf{OBJECT CLASS:} \MakeUppercase{#1}%
+  \end{tcolorbox}%
+  \vspace{4pt}%
+}
+
+% Speaker — red name in dialogue
+\renewcommand{\speaker}[1]{%
+  {\ttfamily\bfseries\color{scpred}#1:}%
+}
+
+% Log header
+\renewcommand{\logheader}[1]{%
+  {\sffamily\bfseries\color{scpblack}\MakeUppercase{#1}}\\[0.3cm]%
+}
+
+% ─── Override environments ───────────────────────────────────────────
+
+% Quote block — thin gray frame box
+\renewenvironment{scpquote}{%
+  \vspace{4pt}%
+  \begin{tcolorbox}[
+    enhanced,
+    breakable,
+    colback=scplightgray,
+    colframe=scpgray!40,
+    boxrule=0.5pt,
+    sharp corners,
+    left=8pt, right=8pt, top=6pt, bottom=6pt,
+    fontupper=\small\itshape
+  ]%
+}{%
+  \end{tcolorbox}%
+  \vspace{4pt}%
+}
+
+% Dialogue block — black frame, monospace, transcript markers
+\renewenvironment{scpdialogue}{%
+  \vspace{4pt}%
+  \begin{tcolorbox}[
+    enhanced,
+    breakable,
+    colback=white,
+    colframe=scpblack,
+    boxrule=1pt,
+    sharp corners,
+    left=8pt, right=8pt, top=6pt, bottom=6pt,
+    fontupper=\ttfamily\small,
+    before upper={\noindent\sffamily\scriptsize\color{scpgray}\MakeUppercase{[Transcript Begin]}\par\vspace{4pt}\ttfamily}
+  ]%
+}{%
+  \par\vspace{4pt}%
+  \noindent{\sffamily\scriptsize\color{scpgray}\MakeUppercase{[Transcript End]}}%
+  \end{tcolorbox}%
+  \vspace{4pt}%
+}
+
+% ─── Title page ──────────────────────────────────────────────────────
+\renewcommand{\scptitlepage}[3]{%
+  \thispagestyle{empty}%
+  \begin{tikzpicture}[remember picture, overlay]
+    % Page background
+    \fill[scppaper] (current page.south west) rectangle (current page.north east);
+    % Top red bar
+    \fill[scpred] ([yshift=-1cm]current page.north west) rectangle
+                    ([yshift=-1.3cm]current page.north east);
+    % Bottom red bar
+    \fill[scpred] ([yshift=1cm]current page.south west) rectangle
+                    ([yshift=1.3cm]current page.south east);
+  \end{tikzpicture}%
+  %
+  \vspace*{2cm}%
+  %
+  % TOP SECRET stamp
+  \begin{center}
+    \begin{tikzpicture}
+      \node[
+        draw=scpstamp,
+        line width=3pt,
+        rounded corners=2pt,
+        rotate=-8,
+        inner sep=8pt,
+        font=\fontsize{28}{32}\selectfont\ttfamily\bfseries\color{scpstamp},
+        opacity=0.8
+      ] {TOP SECRET};
+    \end{tikzpicture}
+  \end{center}%
+  %
+  \vspace{1.5cm}%
+  %
+  % Title block
+  \begin{center}
+    {\fontsize{36}{42}\selectfont\ttfamily\bfseries\color{scpblack}%
+     \MakeUppercase{#1}\par}%
+    \vspace{0.5cm}%
+    {\Large\sffamily\color{scpgray}#2\par}%
+  \end{center}%
+  %
+  \vspace{1cm}%
+  %
+  % CLASSIFIED box
+  \begin{center}
+    \begin{tcolorbox}[
+      enhanced,
+      colback=scpred,
+      colframe=scpred,
+      boxrule=0pt,
+      sharp corners,
+      width=0.6\textwidth,
+      halign=center,
+      left=10pt, right=10pt, top=8pt, bottom=8pt,
+      fontupper=\sffamily\bfseries\color{white}
+    ]
+      \centering
+      \large CLASSIFIED\\[2pt]
+      \normalsize LEVEL 4 CLEARANCE REQUIRED
+    \end{tcolorbox}
+  \end{center}%
+  %
+  \vspace*{\fill}%
+  %
+  % Document metadata
+  \begin{center}
+    {\sffamily\color{scpgray}%
+     \small Document compiled by: #3\\[4pt]%
+     \small Clearance verified: \today\\[4pt]%
+     \scriptsize UNAUTHORIZED REPRODUCTION OR DISTRIBUTION\\[-1pt]%
+     \scriptsize IS PUNISHABLE UNDER FOUNDATION PROTOCOL 4X-201%
+    }%
+  \end{center}%
+  %
+  \vspace{1cm}%
+  \newpage
+}
+
+% ─── Chapter opener override ─────────────────────────────────────────
+\renewcommand{\scpchapter}[1]{%
+  \chapter{#1}%
+}
+
+% ─── Hyperref styling ────────────────────────────────────────────────
+\hypersetup{
+  colorlinks=true,
+  linkcolor=scpdarkred,
+  urlcolor=scpred,
+  citecolor=scpgray
+}
+
+% ─── Load decorative stamps ─────────────────────────────────────────
+\input{graphics/stamps}
+
+\endinput

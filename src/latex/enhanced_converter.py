@@ -19,6 +19,7 @@ class EnhancedLaTeXConverter:
         self.config = config
         self.footnote_counter = 0
         self.image_map = image_map or {}  # SCP number -> list of image info dicts
+        self.theme = getattr(config, 'theme', 'redacted')
         
     def generate_book(self, chapters: List[Dict[str, Any]]) -> str:
         """Generate complete LaTeX book from organized chapters"""
@@ -62,7 +63,7 @@ class EnhancedLaTeXConverter:
 
         # Add object class if available
         if document.object_class and document.object_class.strip():
-            latex += f"\\textbf{{Object Class:}} {self._escape_latex(document.object_class)}\n\n"
+            latex += f"\\objectclass{{{self._escape_latex(document.object_class)}}}\n\n"
 
         # Process each section
         for section in document.sections:
@@ -105,8 +106,8 @@ class EnhancedLaTeXConverter:
     def _generate_chapter_with_includes(self, chapter: Dict[str, Any], latex_files: Dict[str, str]) -> str:
         """Generate a chapter using include statements for individual SCPs"""
         
-        latex = f"\\chapter{{{self._escape_latex(chapter['title'])}}}\n\n"
-        
+        latex = f"\\scpchapter{{{self._escape_latex(chapter['title'])}}}\n\n"
+
         # Include each SCP document in this chapter
         for document in chapter['documents']:
             if document.scp_number in latex_files:
@@ -124,136 +125,30 @@ class EnhancedLaTeXConverter:
         return latex
     
     def _generate_preamble(self) -> str:
-        """Generate LaTeX document preamble with enhanced packages"""
-        
+        """Generate LaTeX document preamble — delegates styling to theme .sty files"""
+
+        theme = self.theme
         preamble = f"""\\documentclass[{self.config.font_size},{self.config.paper_size}]{{{self.config.document_class}}}
 
-% Basic packages
-\\usepackage[utf8]{{inputenc}}
-\\usepackage[T1]{{fontenc}}
-\\usepackage{{lmodern}}
-\\usepackage{{geometry}}
-\\usepackage{{fancyhdr}}
-\\usepackage{{graphicx}}
-\\usepackage{{float}}
-\\usepackage{{hyperref}}
-\\usepackage{{amsmath}}
-\\usepackage{{amsfonts}}
-\\usepackage{{xcolor}}
-\\usepackage{{multicol}}
-\\usepackage{{wrapfig}}
-\\usepackage{{enumitem}}
-\\usepackage{{changepage}}
-\\usepackage{{framed}}
-
-% Page layout
-\\geometry{{margin=1in, headheight=15pt}}
-
-% Headers and footers
-\\pagestyle{{fancy}}
-\\fancyhf{{}}
-\\fancyhead[LE,RO]{{\\thepage}}
-\\fancyhead[LO,RE]{{SCP Foundation Archive}}
-
-% Custom commands for SCP formatting
-\\newcommand{{\\scpnumber}}[1]{{\\textbf{{\\large #1}}}}
-\\newcommand{{\\objectclass}}[1]{{\\textbf{{Object Class:}} #1}}
-\\newcommand{{\\containment}}{{\\textbf{{Special Containment Procedures:}}}}
-\\newcommand{{\\scpdescription}}{{\\textbf{{Description:}}}}
-\\newcommand{{\\addendum}}[1]{{\\textbf{{Addendum #1:}}}}
-
-% Enhanced formatting for dialogue and quotes
-\\definecolor{{quotebg}}{{RGB}}{{248, 248, 248}}
-\\definecolor{{dialoguebg}}{{RGB}}{{240, 245, 255}}
-\\definecolor{{scpred}}{{RGB}}{{187, 0, 0}}
-\\definecolor{{scpgray}}{{RGB}}{{102, 102, 102}}
-
-% Quote block environment (simple indented block)
-\\newenvironment{{scpquote}}
-{{\\begin{{adjustwidth}}{{1cm}}{{1cm}}\\small\\itshape}}
-{{\\upshape\\end{{adjustwidth}}\\vspace{{0.3cm}}}}
-
-% Dialogue environment
-\\newenvironment{{scpdialogue}}
-{{\\begin{{adjustwidth}}{{1cm}}{{1cm}}\\small\\color{{black}}}}
-{{\\end{{adjustwidth}}}}
-
-% Speaker command for dialogue
-\\newcommand{{\\speaker}}[1]{{\\textbf{{#1:}}}}
-
-% Experiment/log header
-\\newcommand{{\\logheader}}[1]{{\\textbf{{#1}}\\\\[0.3cm]}}
-
-% Redaction black box (for redacted text like dates and names)
-\\newcommand{{\\blackbox}}{{\\rule{{1ex}}{{1.2ex}}}}
+% Theme: {theme}
+% scpbase provides all semantic commands/environments with minimal defaults.
+% The theme package overrides them with visual styling.
+\\usepackage{{scpbase}}
+\\usepackage{{{theme}}}
 
 """
-
-        # Add RPG styling if enabled
-        if self.config.use_rpg_styling:
-            preamble += self._get_rpg_styling()
-        
         return preamble
     
-    def _get_rpg_styling(self) -> str:
-        """Additional styling for fantasy RPG appearance"""
-        return """
-% RPG-style packages
-\\usepackage{tcolorbox}
-\\usepackage{tikz}
-
-% Custom colors for RPG style
-\\definecolor{parchment}{RGB}{255, 248, 220}
-\\definecolor{darkbrown}{RGB}{101, 67, 33}
-\\definecolor{burgundy}{RGB}{128, 0, 32}
-
-% Enhanced SCP box styling
-\\newtcolorbox{scpbox}{
-    colback=parchment,
-    colframe=darkbrown,
-    boxrule=2pt,
-    arc=5pt,
-    left=10pt,
-    right=10pt,
-    top=10pt,
-    bottom=10pt
-}
-
-"""
-    
     def _generate_title_page(self) -> str:
-        """Generate the book title page"""
-        return f"""
-\\title{{{self.config.title}}}
-\\author{{{self.config.author}}}
-\\date{{\\today}}
-
-\\maketitle
-\\thispagestyle{{empty}}
-
-\\vspace*{{\\fill}}
-\\begin{{center}}
-\\textit{{{self.config.subtitle}}}
-
-\\vspace{{1cm}}
-
-\\textbf{{CLASSIFIED}} \\\\
-\\textbf{{LEVEL 4 CLEARANCE REQUIRED}}
-
-\\vspace{{0.5cm}}
-
-\\textit{{Property of the SCP Foundation}} \\\\
-\\textit{{Unauthorized access is prohibited}}
-\\end{{center}}
-\\vspace*{{\\fill}}
-
-\\newpage
-
-"""
+        """Generate the book title page — delegates to theme's \\scptitlepage command"""
+        title = self._escape_latex(self.config.title)
+        subtitle = self._escape_latex(self.config.subtitle)
+        author = self._escape_latex(self.config.author)
+        return f"\\scptitlepage{{{title}}}{{{subtitle}}}{{{author}}}\n\n"
     
     def _generate_chapter(self, chapter: Dict[str, Any]) -> str:
         """Generate LaTeX for a single chapter"""
-        latex = f"\\chapter{{{chapter['title']}}}\n\n"
+        latex = f"\\scpchapter{{{self._escape_latex(chapter['title'])}}}\n\n"
         
         # Process each SCP in the chapter
         for doc in chapter['documents']:
@@ -267,29 +162,20 @@ class EnhancedLaTeXConverter:
     
     def _generate_enhanced_scp_section(self, doc: EnhancedSCPDocument) -> str:
         """Generate LaTeX for an enhanced SCP document"""
-        
-        if self.config.use_rpg_styling:
-            latex = "\\begin{scpbox}\n"
-        else:
-            latex = ""
-        
-        latex += f"\\section{{{doc.scp_number}}}\n\n"
-        
+        latex = f"\\section{{{doc.scp_number}}}\n\n"
+
         # Add title if present
         if doc.title and not doc.title.startswith('[['):
             latex += f"\\textit{{{self._escape_latex(doc.title)}}}\\\\[0.5cm]\n\n"
-        
+
         # Object Class
         if doc.object_class:
-            latex += f"\\objectclass{{{doc.object_class}}}\\\\[0.3cm]\n\n"
-        
+            latex += f"\\objectclass{{{self._escape_latex(doc.object_class)}}}\n\n"
+
         # Process sections
         for section in doc.sections:
             latex += self._generate_section_latex(section)
-        
-        if self.config.use_rpg_styling:
-            latex += "\\end{scpbox}\n"
-        
+
         return latex
     
     def _generate_section_latex(self, section: SCPSection) -> str:

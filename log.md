@@ -1,5 +1,23 @@
 # Development Log
 
+## 2026-02-20 REDACTED theme system implemented
+
+Added modular LaTeX theme system:
+- `src/latex/themes/scpbase.sty` — base semantic layer (all commands/environments with minimal defaults)
+- `src/latex/themes/redacted.sty` — classified-document theme (red accents, Courier headers, tcolorbox sections, classification stamps, styled title page)
+- `src/latex/themes/graphics/stamps.tex` — reusable TikZ decorative elements
+
+Pipeline changes:
+- `enhanced_converter.py`: removed all hardcoded styling, preamble now just loads `\usepackage{scpbase}` + `\usepackage{<theme>}`
+- `builder.py`: added `theme` config field, copies .sty files to latex output dir
+- `compile_latex.py`: sets TEXINPUTS so pdflatex finds theme files
+
+Volume 1 compiles cleanly (37 pages, 316KB, zero errors). Theme swap verified — `scpbase`-only also compiles (35 pages).
+
+Up next:
+- Visual review of PDF (need poppler for rendering)
+- Iterate on styling details
+
 ## 2026-02-20 Downloaded original images for SCP-173 and SCP-682
 
 Downloaded the original iconic images that were removed from the wiki:

@@ -1,0 +1,85 @@
+% stamps.tex — Reusable TikZ classification stamps and decorative elements
+% Loaded by theme .sty files via \input{graphics/stamps}
+
+% ─── Classification stamp (inline) ──────────────────────────────────
+% Usage: \classificationstamp{TEXT}
+\newcommand{\classificationstamp}[1]{%
+  \begin{tikzpicture}[baseline=(text.base)]
+    \node[
+      draw=scpstamp,
+      line width=1.5pt,
+      rounded corners=1pt,
+      inner sep=3pt,
+      font=\sffamily\bfseries\scriptsize\color{scpstamp},
+      opacity=0.85
+    ] (text) {\MakeUppercase{#1}};
+  \end{tikzpicture}%
+}
+
+% ─── Rotated classification stamp (for overlays) ────────────────────
+% Usage: \rotatedstamp{TEXT}{angle}
+\newcommand{\rotatedstamp}[2]{%
+  \begin{tikzpicture}
+    \node[
+      draw=scpstamp,
+      line width=2.5pt,
+      rounded corners=2pt,
+      rotate=#2,
+      inner sep=6pt,
+      font=\fontsize{18}{20}\selectfont\ttfamily\bfseries\color{scpstamp},
+      opacity=0.7
+    ] {\MakeUppercase{#1}};
+  \end{tikzpicture}%
+}
+
+% ─── Document control number ────────────────────────────────────────
+% Typewriter-style control number for headers or metadata
+% Usage: \controlnumber{DOC-SCP-2026-0001}
+\newcommand{\controlnumber}[1]{%
+  {\ttfamily\scriptsize\color{scpgray}#1}%
+}
+
+% ─── Redaction bar ──────────────────────────────────────────────────
+% Black bar for redacted text of arbitrary length
+% Usage: \redacted{approximate width, e.g. 3cm}
+\newcommand{\redacted}[1]{%
+  \tikz[baseline=(bar.base)]{%
+    \node[
+      fill=scpblack,
+      minimum width=#1,
+      minimum height=1.1em,
+      inner sep=0pt
+    ] (bar) {};
+  }%
+}
+
+% ─── Section divider ────────────────────────────────────────────────
+% Red-accented horizontal rule
+% Usage: \scpdivider
+\newcommand{\scpdivider}{%
+  \vspace{6pt}%
+  \noindent
+  \begin{tikzpicture}
+    \draw[scpred, line width=0.8pt] (0,0) -- (\textwidth,0);
+    \fill[scpred] (0.5\textwidth-3pt, -2pt) rectangle (0.5\textwidth+3pt, 2pt);
+  \end{tikzpicture}%
+  \vspace{6pt}%
+}
+
+% ─── Clearance level badge ──────────────────────────────────────────
+% Usage: \clearancebadge{4}
+\newcommand{\clearancebadge}[1]{%
+  \begin{tikzpicture}[baseline=(badge.base)]
+    \node[
+      draw=scpred,
+      fill=scpred,
+      line width=0.8pt,
+      rounded corners=2pt,
+      inner xsep=5pt,
+      inner ysep=2pt,
+      font=\sffamily\bfseries\scriptsize\color{white}
+    ] (badge) {LEVEL #1};
+  \end{tikzpicture}%
+}
+
+\endinput

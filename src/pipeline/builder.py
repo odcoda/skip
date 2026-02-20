@@ -53,7 +53,8 @@ class PipelineConfig:
     document_class: str = "book"
     font_size: str = "12pt"
     paper_size: str = "letterpaper"
-    use_rpg_styling: bool = False  # Start with basic, enable later
+    use_rpg_styling: bool = False  # Deprecated — use theme instead
+    theme: str = "redacted"  # Theme name: "redacted", "scpbase", etc.
 
 
 class SCPBookBuilder:
@@ -188,6 +189,24 @@ class SCPBookBuilder:
                 image_map[scp_key.upper().replace('SCP', 'SCP')] = existing
         return image_map
 
+    def copy_theme_files(self):
+        """Copy theme .sty and graphics files into the latex output directory"""
+        import shutil
+        themes_src = Path(__file__).parent.parent / "latex" / "themes"
+        themes_dst = Path(self.config.latex_dir)
+
+        # Copy .sty files
+        for sty in themes_src.glob("*.sty"):
+            shutil.copy2(sty, themes_dst / sty.name)
+
+        # Copy graphics directory
+        graphics_src = themes_src / "graphics"
+        graphics_dst = themes_dst / "graphics"
+        if graphics_src.exists():
+            if graphics_dst.exists():
+                shutil.rmtree(graphics_dst)
+            shutil.copytree(graphics_src, graphics_dst)
+
     def generate_individual_latex_files(self, documents: List[EnhancedSCPDocument]) -> Dict[str, str]:
         """Generate individual LaTeX files for each SCP document"""
         from latex.enhanced_converter import EnhancedLaTeXConverter
@@ -262,8 +281,13 @@ class SCPBookBuilder:
         
         print(f"   Generated main LaTeX: {latex_file}")
         
+        # Step 6.5: Copy theme files
+        print("\n6. Copying theme files...")
+        self.copy_theme_files()
+        print(f"   Theme: {self.config.theme}")
+
         # Step 7: Compile to PDF
-        print("\n6. Compiling to PDF...")
+        print("\n7. Compiling to PDF...")
         from pipeline.compile_latex import compile_latex_to_pdf
         
         success, pdf_path, error = compile_latex_to_pdf(latex_file)

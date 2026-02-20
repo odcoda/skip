@@ -1,0 +1,101 @@
+% scpbase.sty — Base semantic layer for SCP Foundation books
+% Defines all commands/environments with minimal defaults.
+% Any theme can \RequirePackage{scpbase} and override these.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{scpbase}[2026/02/20 SCP Foundation base semantic layer]
+
+% ─── Required packages ───────────────────────────────────────────────
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[T1]{fontenc}
+\RequirePackage{lmodern}
+\RequirePackage{geometry}
+\RequirePackage{fancyhdr}
+\RequirePackage{graphicx}
+\RequirePackage{float}
+\RequirePackage{hyperref}
+\RequirePackage{xcolor}
+\RequirePackage{enumitem}
+\RequirePackage{changepage}
+\RequirePackage{wrapfig}
+\RequirePackage{caption}
+
+% ─── Page geometry (themes may override) ─────────────────────────────
+\geometry{margin=1in, headheight=15pt}
+
+% ─── Basic colors ────────────────────────────────────────────────────
+\definecolor{scpred}{RGB}{187,0,0}
+\definecolor{scpblack}{RGB}{20,20,20}
+\definecolor{scpgray}{RGB}{102,102,102}
+\definecolor{scplightgray}{RGB}{240,240,240}
+
+% ─── Headers / footers (minimal defaults) ────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE,RO]{\thepage}
+\fancyhead[LO,RE]{SCP Foundation Archive}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% ─── Section-level semantic commands ─────────────────────────────────
+
+% Containment procedures header
+\newcommand{\containment}{\subsection*{Special Containment Procedures}}
+
+% Description header
+\newcommand{\scpdescription}{\subsection*{Description}}
+
+% Addendum header (takes title argument)
+\newcommand{\addendum}[1]{\subsection*{Addendum #1}}
+
+% Object class display
+\newcommand{\objectclass}[1]{\textbf{Object Class:} #1}
+
+% Speaker name in dialogue
+\newcommand{\speaker}[1]{\textbf{#1:}}
+
+% Log/experiment header
+\newcommand{\logheader}[1]{\textbf{#1}\\[0.3cm]}
+
+% Redaction black box
+\newcommand{\blackbox}{\rule{1ex}{1.2ex}}
+
+% SCP number formatting
+\newcommand{\scpnumber}[1]{\textbf{\large #1}}
+
+% ─── Environments ────────────────────────────────────────────────────
+
+% Quote block (simple indented)
+\newenvironment{scpquote}
+  {\begin{adjustwidth}{1cm}{1cm}\small\itshape}
+  {\upshape\end{adjustwidth}\vspace{0.3cm}}
+
+% Dialogue block
+\newenvironment{scpdialogue}
+  {\begin{adjustwidth}{1cm}{1cm}\small}
+  {\end{adjustwidth}\vspace{0.3cm}}
+
+% ─── Title page command (themes override this) ──────────────────────
+% Arguments: {title}{subtitle}{author}
+\newcommand{\scptitlepage}[3]{%
+  \title{#1}
+  \author{#3}
+  \date{\today}
+  \maketitle
+  \thispagestyle{empty}
+  \vspace*{\fill}
+  \begin{center}
+    \textit{#2}\\[1cm]
+    \textbf{CLASSIFIED}\\
+    \textbf{LEVEL 4 CLEARANCE REQUIRED}\\[0.5cm]
+    \textit{Property of the SCP Foundation}\\
+    \textit{Unauthorized access is prohibited}
+  \end{center}
+  \vspace*{\fill}
+  \newpage
+}
+
+% ─── Chapter opener command (themes override this) ───────────────────
+% Default: just a regular \chapter
+\newcommand{\scpchapter}[1]{\chapter{#1}}
+
+\endinput

@@ -11,8 +11,11 @@ import subprocess
 import shutil
 from pathlib import Path
 
+# Theme directory (src/latex/themes)
+THEMES_DIR = Path(__file__).parent.parent / "latex" / "themes"
 
-def compile_latex_to_pdf(latex_file, output_pdf_dir=None, build_dir=None):
+
+def compile_latex_to_pdf(latex_file, output_pdf_dir=None, build_dir=None, themes_dir=None):
     """
     Compile LaTeX file to PDF with organized directory structure.
     
@@ -43,6 +46,13 @@ def compile_latex_to_pdf(latex_file, output_pdf_dir=None, build_dir=None):
     os.makedirs(build_dir, exist_ok=True)
     os.makedirs(output_pdf_dir, exist_ok=True)
     
+    # Build TEXINPUTS so pdflatex can find theme .sty files
+    if themes_dir is None:
+        themes_dir = str(THEMES_DIR)
+    env = os.environ.copy()
+    # TEXINPUTS: latex_dir (for main .tex), themes_dir (for .sty), then defaults
+    env["TEXINPUTS"] = f"{latex_dir}:{themes_dir}:{env.get('TEXINPUTS', '')}"
+
     try:
         # Run pdflatex twice for proper TOC generation
         # First pass generates .aux file with TOC entries
@@ -57,7 +67,8 @@ def compile_latex_to_pdf(latex_file, output_pdf_dir=None, build_dir=None):
                 cwd=latex_dir,
                 capture_output=True,
                 text=True,
-                timeout=120  # 2 minute timeout
+                timeout=120,  # 2 minute timeout
+                env=env
             )
 
             if result.returncode != 0:
