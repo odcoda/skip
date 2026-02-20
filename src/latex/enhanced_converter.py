@@ -328,20 +328,21 @@ class EnhancedLaTeXConverter:
         return latex
     
     def _generate_image_latex(self, image_info: dict, scp_number: str) -> str:
-        """Generate LaTeX for an SCP image, floated right"""
+        """Generate LaTeX for an SCP image, right-aligned at full reliability."""
         filename = image_info.get('filename', '')
         caption = image_info.get('caption', '')
         scp_slug = scp_number.lower()
         subdir = image_info.get('location', '')
         img_path = self._relative_image_path(scp_slug, filename, subdir)
 
-        latex = "\\begin{wrapfigure}{r}{0.4\\textwidth}\n"
-        latex += "  \\centering\n"
+        # Avoid wrapfigure at section starts: it can silently drop images when
+        # there is no immediate paragraph text to wrap against.
+        latex = "\\begin{flushright}\n"
         latex += f"  \\includegraphics[width=0.38\\textwidth]{{{img_path}}}\n"
         if caption:
             clean_caption = self._escape_latex(caption)
-            latex += f"  \\caption*{{\\small {clean_caption}}}\n"
-        latex += "\\end{wrapfigure}\n\n"
+            latex += f"  \\\\{{\\footnotesize\\itshape {clean_caption}}}\n"
+        latex += "\\end{flushright}\n\n"
 
         return latex
 

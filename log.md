@@ -152,3 +152,14 @@ Validated by rebuilding Volume 1 successfully (`output/pdf/scp_book.pdf`).
 
 Up next:
 - Visual polish pass after installing PDF page-image tooling in this environment
+
+## 2026-02-20 right-aligned image rendering fix (volume1)
+Fixed missing right-aligned top images in `output/pdf/scp_book.pdf`:
+- Root cause: `wrapfigure` blocks were emitted before paragraph text at section starts, causing images to disappear in PDF output
+- Replaced top image rendering with explicit `flushright` image blocks in converter (`src/latex/enhanced_converter.py`)
+
+Verification:
+- Rebuilt Volume 1 (`uv run src/build_volume1.py`)
+- Ran PDF-to-image script on the generated PDF:
+  - `venv/bin/python src/tools/pdf_viewer.py output/pdf/scp_book.pdf -o output/preview/volume1_check_after -p 11 12 15 16 26 29 32 33 36 38`
+- Confirmed right-aligned images now render on target pages (e.g. SCP-087 page 11, SCP-173 page 15, SCP-682 page 26, SCP-963 page 36).
