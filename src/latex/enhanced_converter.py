@@ -436,7 +436,8 @@ class EnhancedLaTeXConverter:
         # Images are in output/images/scp-XXX/filename
         # LaTeX articles are in output/latex/volume1/articles/
         # So relative path is ../../../images/scp-XXX/filename
-        img_path = f"../../../images/{scp_slug}/{filename}"
+        subdir = image_info.get('location', '')
+        img_path = f"../../../images/{scp_slug}/{subdir}{filename}"
 
         latex = "\\begin{wrapfigure}{r}{0.4\\textwidth}\n"
         latex += "  \\centering\n"

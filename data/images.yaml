@@ -42,13 +42,23 @@ SCP-093:
 
 SCP-173:
   images:
-    - filename: scp-173-original.jpg
-      url: null
+    - filename: untitled_2004_museum.jpg
+      url: https://payload.cargocollective.com/1/9/319203/4868950/IK_2004_view_Mito_1_879.jpg
       caption: SCP-173
+      location: originals/
       notes: |
-        ORIGINAL IMAGE REMOVED due to licensing (Untitled 2004 by Izumi Kato).
-        The original article had no image. Need to find appropriate replacement.
-        Search "SCP-173 sculpture" for fan art alternatives.
+        ORIGINAL IMAGE REMOVED (February 2022) - was a photo of "Untitled 2004",
+        a wood/acrylic/charcoal sculpture (205x56x52cm) by Japanese artist Izumi Kato.
+        Photo by Keisuke Yamamoto, courtesy of SCAI The Bathhouse gallery (Tokyo).
+        Kato gave reluctant non-commercial permission but was unhappy with the association.
+        SCP wiki removed it voluntarily; Kato did not demand removal.
+        Original author (Wesley Williams) requested no replacement image be added.
+        Artist's official page: https://izumikato.com/Untitled-2004
+        Museum photo (by Tuyoshi Saito): https://payload.cargocollective.com/1/9/319203/4868950/IK_2004_view_Mito_1_879.jpg
+        Gallery exhibit (by Keisuke Yamamoto): see SCAI The Bathhouse archives
+        Artsy listing: https://www.artsy.net/artwork/izumi-kato-untitled-170
+        Wikipedia: https://en.wikipedia.org/wiki/Untitled_(2004)
+        NOT licensed for commercial use or CC. Personal reference only.
 
 SCP-231:
   images:
@@ -71,12 +81,38 @@ SCP-500:
 
 SCP-682:
   images:
+    - filename: Monster8.jpg
+      url: https://static.wikia.nocookie.net/cryptidz/images/9/93/Monster8.jpg
+      caption: "SCP-682 (original image: Sakhalin Island Sea Wolf)"
+      location: originals/
+      original: true
     - filename: monster8editub9-new.jpg
       url: http://scp-wiki.wdfiles.com/local--files/scp-682/monster8editub9-new.jpg
       caption: SCP-682 shortly after escaping from containment, still recovering from acid immersion
+      license: CC BY-SA 3.0 (derivative by OccultistMave, original by Paxson Woelber CC BY 2.0)
       notes: |
-        REPLACEMENT IMAGE - original iconic crocodile skull photo had licensing issues.
-        Current image is a placeholder. Search for better SCP-682 fan art.
+        CURRENT IMAGE is a derivative of "Beached humpback whale at Kincaid Park,
+        Anchorage, Alaska" by Paxson Woelber (Flickr, CC BY 2.0), edited by OccultistMave.
+        This is the wiki's current properly-licensed replacement.
+        ORIGINAL IMAGE was a photo of the "Sakhalin Island Sea Wolf" - a decomposed
+        beluga whale carcass found by Russian soldiers on Sakhalin Island in 2006.
+        The Sakhalin photos were first posted on Argentinian sci-fi site Axxon (Aug 16, 2006),
+        then translated on Cryptomundo (Aug 17, 2006), then English Russia (Aug 28, 2006).
+        The original photo had no clear license/attribution and was replaced.
+        Sakhalin photos still available on Cryptid Wiki:
+          https://cryptidz.fandom.com/wiki/Sakhalin_Island_Sea_Wolf
+        Individual Sakhalin carcass photos (from Cryptid Wiki):
+          https://static.wikia.nocookie.net/cryptidz/images/4/46/Monster1s.jpg
+          https://static.wikia.nocookie.net/cryptidz/images/3/34/Monster9.jpg
+          https://static.wikia.nocookie.net/cryptidz/images/e/e1/Monster14.jpg
+          https://static.wikia.nocookie.net/cryptidz/images/2/2a/Monster17.jpg
+          https://static.wikia.nocookie.net/cryptidz/images/4/40/Monster2.jpg
+          https://static.wikia.nocookie.net/cryptidz/images/2/26/MonsterM.jpg
+          https://static.wikia.nocookie.net/cryptidz/images/e/e6/Monster3.jpg
+          https://static.wikia.nocookie.net/cryptidz/images/f/f4/Monster16.jpg
+          https://static.wikia.nocookie.net/cryptidz/images/9/93/Monster8.jpg
+        The carcass was ~15 feet long, 4 feet wide, with a beak-like mouth and
+        shaggy "hair" (decomposed blubber). Identified as a male beluga whale.
 
 SCP-701:
   images:
@@ -90,9 +126,15 @@ SCP-882:
     - filename: Gears2.jpg
       url: http://scp-wiki.wdfiles.com/local--files/scp-882/Gears2.jpg
       caption: SCP-882
+      license: CC BY 2.0
+      author: psyberartist
+      source: https://flic.kr/p/awGM57
       notes: |
-        REPLACEMENT IMAGE - original had licensing issues.
-        Current is generic gears photo. Search for better mechanical horror imagery.
+        This appears to be the CURRENT (and possibly original) wiki image.
+        Photo "gears" by psyberartist on Flickr, CC BY 2.0 - properly licensed.
+        No clear evidence this was a replacement; it may have always been this image.
+        Flickr page: https://flickr.com/photos/psyberartist/6254661890/
+        SCP wiki direct: https://scp-wiki.wdfiles.com/local--files/scp-882/Gears2.jpg
 
 SCP-914:
   images:
@@ -100,9 +142,15 @@ SCP-914:
       url: http://scp-wiki.wdfiles.com/local--files/scp-914/gears.jpg
       caption: One of the least complex sections of SCP-914 in a non-active state
       width: 200px
+      license: CC BY-SA 2.0
+      author: Thomas Claveirole
+      source: https://www.flickr.com/photos/thomasclaveirole/463202335
       notes: |
-        REPLACEMENT IMAGE - original clockwork device photo had licensing issues.
-        Current is generic gears. Search for ornate clockwork machinery images.
+        This appears to be the CURRENT (and possibly original) wiki image.
+        Photo "Gears" by Thomas Claveirole on Flickr, CC BY-SA 2.0 - properly licensed.
+        No clear evidence this was a replacement; it may have always been this image.
+        Flickr page: https://www.flickr.com/photos/thomasclaveirole/463202335
+        SCP wiki direct: https://scp-wiki.wdfiles.com/local--files/scp-914/gears.jpg
 
 SCP-963:
   images:

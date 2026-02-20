@@ -180,7 +180,8 @@ class SCPBookBuilder:
             existing = []
             for img in images:
                 if img.get('url') and img.get('filename'):
-                    img_path = OUTPUT_DIR / "images" / scp_key.lower() / img['filename']
+                    subdir = img.get('location', '')
+                    img_path = OUTPUT_DIR / "images" / scp_key.lower() / subdir / img['filename']
                     if img_path.exists():
                         existing.append(img)
             if existing:

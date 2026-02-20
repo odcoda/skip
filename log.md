@@ -1,5 +1,30 @@
 # Development Log
 
+## 2026-02-20 Downloaded original images for SCP-173 and SCP-682
+
+Downloaded the original iconic images that were removed from the wiki:
+- **SCP-173**: "Untitled 2004" museum installation photo by Tuyoshi Saito (from cargocollective.com)
+- **SCP-682**: Sakhalin Island Sea Wolf photos (4 photos from Cryptid Wiki, converted from WebP to JPEG)
+
+Stored in `output/images/<scp>/originals/` subdirectories. Updated `images.yaml` with `location: originals/` field and kept both original and current wiki images for SCP-682. Updated builder and converter to handle the `location` subdirectory.
+
+Rebuilt Volume 1 PDF (3.5MB) - both original images rendering correctly via wrapfigure.
+
+## 2026-02-14 Original/iconic image research for copyright-removed SCPs
+
+Researched original images that were removed from SCP wiki articles and updated `data/images.yaml` with findings:
+
+- **SCP-173**: "Untitled 2004" by Izumi Kato, photo by Keisuke Yamamoto. Removed Feb 2022 by wiki staff (not demanded by Kato). Artist's page: izumikato.com/Untitled-2004. NOT CC-licensed.
+- **SCP-682**: Original was "Sakhalin Island Sea Wolf" (decomposed beluga whale, Sakhalin Island 2006). Replaced with beached humpback whale (CC BY 2.0 by Paxson Woelber, edited by OccultistMave). Original photos available on Cryptid Wiki.
+- **SCP-882**: Current image (Gears2.jpg by psyberartist, Flickr CC BY 2.0) appears to be the original -- no evidence of replacement found.
+- **SCP-914**: Current image (gears.jpg by Thomas Claveirole, Flickr CC BY-SA 2.0) appears to be the original -- no evidence of replacement found.
+
+Updated images.yaml with URLs, attribution, licensing details, and context for all four.
+
+Up next:
+- Download the Sakhalin photos for SCP-682 reference
+- Integrate images into PDF builds
+
 ## 2026-01-25 Volume 1 first build complete
 
 Built Volume 1: Heritage Collection (14 iconic SCPs from the 2013 Heritage Collection)
