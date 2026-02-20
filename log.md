@@ -139,3 +139,16 @@ wrote parser/converter differences in doc/architecture.md
 
 ## 2026-01-06 architecture notes update
 replaced doc/architecture.md with the full control flow/dependency summary and parser/converter comparison
+
+## 2026-02-20 formatting pass (redacted theme + image restore)
+Implemented a focused formatting pass for Volume 1:
+- Restored embedded `component:image-block` images in article bodies (e.g. SCP-087/SCP-963) instead of placeholder text
+- Made image paths robust relative to configured LaTeX/output directories
+- Refined `redacted.sty` for 6x9: smaller body text, tighter margins, lighter transcript/section boxes
+- Reworked redaction bars to marker-style textured censorship bars via TikZ (taller/less unicode-looking)
+- Fixed PDF output path regression (`output/output/pdf` -> configured `output/pdf`)
+
+Validated by rebuilding Volume 1 successfully (`output/pdf/scp_book.pdf`).
+
+Up next:
+- Visual polish pass after installing PDF page-image tooling in this environment

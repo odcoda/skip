@@ -8,6 +8,7 @@ with proper handling of dialogue, quote blocks, and complex formatting.
 
 import re
 import os
+from pathlib import Path
 from typing import List, Dict, Any
 from parsers.enhanced_wikidot_parser import EnhancedSCPDocument, ContentBlock, SCPSection
 
@@ -20,6 +21,9 @@ class EnhancedLaTeXConverter:
         self.footnote_counter = 0
         self.image_map = image_map or {}  # SCP number -> list of image info dicts
         self.theme = getattr(config, 'theme', 'redacted')
+        self.current_scp_number = None
+        self.output_dir = Path(getattr(config, 'output_dir', 'output')).resolve()
+        self.latex_dir = Path(getattr(config, 'latex_dir', 'output/latex')).resolve()
         
     def generate_book(self, chapters: List[Dict[str, Any]]) -> str:
         """Generate complete LaTeX book from organized chapters"""
@@ -48,35 +52,40 @@ class EnhancedLaTeXConverter:
     def generate_document_latex(self, document: EnhancedSCPDocument) -> str:
         """Generate LaTeX content for a single SCP document (without preamble)"""
         latex = ""
+        previous_scp = self.current_scp_number
+        self.current_scp_number = document.scp_number
 
-        # Clean and add SCP number and title
-        clean_title = self._clean_wikidot_title(document.title)
-        if clean_title:
-            latex += f"\\section{{{document.scp_number}: {self._escape_latex(clean_title)}}}\n\n"
-        else:
-            latex += f"\\section{{{document.scp_number}}}\n\n"
-        
-        # Add image if available (float right, before content)
-        images = self.image_map.get(document.scp_number, [])
-        if images:
-            latex += self._generate_image_latex(images[0], document.scp_number)
+        try:
+            # Clean and add SCP number and title
+            clean_title = self._clean_wikidot_title(document.title)
+            if clean_title:
+                latex += f"\\section{{{document.scp_number}: {self._escape_latex(clean_title)}}}\n\n"
+            else:
+                latex += f"\\section{{{document.scp_number}}}\n\n"
 
-        # Add object class if available
-        if document.object_class and document.object_class.strip():
-            latex += f"\\objectclass{{{self._escape_latex(document.object_class)}}}\n\n"
+            # Add image if available (float right, before content)
+            images = self.image_map.get(document.scp_number, [])
+            if images:
+                latex += self._generate_image_latex(images[0], document.scp_number)
 
-        # Process each section
-        for section in document.sections:
-            latex += self._generate_section_latex(section)
-        
-        # Add includes and modules as comments for reference
-        if document.includes:
-            latex += "% Includes referenced in original document:\n"
-            for include in document.includes[:3]:  # Limit to avoid clutter
-                component = include.attributes.get('component', 'unknown')
-                latex += f"%   - {component}\n"
-            latex += "\n"
-        
+            # Add object class if available
+            if document.object_class and document.object_class.strip():
+                latex += f"\\objectclass{{{self._escape_latex(document.object_class)}}}\n\n"
+
+            # Process each section
+            for section in document.sections:
+                latex += self._generate_section_latex(section)
+
+            # Add includes and modules as comments for reference
+            if document.includes:
+                latex += "% Includes referenced in original document:\n"
+                for include in document.includes[:3]:  # Limit to avoid clutter
+                    component = include.attributes.get('component', 'unknown')
+                    latex += f"%   - {component}\n"
+                latex += "\n"
+        finally:
+            self.current_scp_number = previous_scp
+
         return latex
     
     def generate_book_with_includes(self, chapters: List[Dict[str, Any]], latex_files: Dict[str, str]) -> str:
@@ -162,19 +171,25 @@ class EnhancedLaTeXConverter:
     
     def _generate_enhanced_scp_section(self, doc: EnhancedSCPDocument) -> str:
         """Generate LaTeX for an enhanced SCP document"""
-        latex = f"\\section{{{doc.scp_number}}}\n\n"
+        previous_scp = self.current_scp_number
+        self.current_scp_number = doc.scp_number
 
-        # Add title if present
-        if doc.title and not doc.title.startswith('[['):
-            latex += f"\\textit{{{self._escape_latex(doc.title)}}}\\\\[0.5cm]\n\n"
+        try:
+            latex = f"\\section{{{doc.scp_number}}}\n\n"
 
-        # Object Class
-        if doc.object_class:
-            latex += f"\\objectclass{{{self._escape_latex(doc.object_class)}}}\n\n"
+            # Add title if present
+            if doc.title and not doc.title.startswith('[['):
+                latex += f"\\textit{{{self._escape_latex(doc.title)}}}\\\\[0.5cm]\n\n"
 
-        # Process sections
-        for section in doc.sections:
-            latex += self._generate_section_latex(section)
+            # Object Class
+            if doc.object_class:
+                latex += f"\\objectclass{{{self._escape_latex(doc.object_class)}}}\n\n"
+
+            # Process sections
+            for section in doc.sections:
+                latex += self._generate_section_latex(section)
+        finally:
+            self.current_scp_number = previous_scp
 
         return latex
     
@@ -316,14 +331,9 @@ class EnhancedLaTeXConverter:
         """Generate LaTeX for an SCP image, floated right"""
         filename = image_info.get('filename', '')
         caption = image_info.get('caption', '')
-        scp_slug = scp_number.lower().replace('-', '-')  # e.g. "SCP-087" -> "scp-087"
-
-        # Build path relative to the latex directory
-        # Images are in output/images/scp-XXX/filename
-        # LaTeX articles are in output/latex/volume1/articles/
-        # So relative path is ../../../images/scp-XXX/filename
+        scp_slug = scp_number.lower()
         subdir = image_info.get('location', '')
-        img_path = f"../../../images/{scp_slug}/{subdir}{filename}"
+        img_path = self._relative_image_path(scp_slug, filename, subdir)
 
         latex = "\\begin{wrapfigure}{r}{0.4\\textwidth}\n"
         latex += "  \\centering\n"
@@ -337,17 +347,103 @@ class EnhancedLaTeXConverter:
 
     def _generate_include_latex(self, block: ContentBlock) -> str:
         """Generate LaTeX for include blocks (placeholders for now)"""
-        
-        component = block.attributes.get('component', 'unknown')
-        
+        component = block.attributes.get('component') or block.content or 'unknown'
+        image_block = self._parse_image_block_component(component)
+
+        if image_block and self.current_scp_number:
+            filename = image_block.get('name', '')
+            caption = image_block.get('caption', '')
+            align = image_block.get('align', 'center').strip().lower()
+
+            if filename:
+                entry = self._find_image_entry(self.current_scp_number, filename)
+                scp_slug = self.current_scp_number.lower()
+                subdir = entry.get('location', image_block.get('location', ''))
+                img_path = self._relative_image_path(scp_slug, filename, subdir)
+                width = self._image_width_from_block(image_block.get('width', ''))
+
+                if align == 'left':
+                    environment = "flushleft"
+                elif align == 'right':
+                    environment = "flushright"
+                else:
+                    environment = "center"
+
+                latex = f"\\begin{{{environment}}}\n"
+                latex += f"\\includegraphics[width={width}]{{{img_path}}}\n"
+                if caption:
+                    clean_caption = self._escape_latex(caption)
+                    latex += f"\\\\{{\\footnotesize\\itshape {clean_caption}}}\n"
+                latex += f"\\end{{{environment}}}"
+                return latex
+
         if 'image-block' in component:
-            # Handle image includes
-            name = block.attributes.get('name', 'image')
-            caption = block.attributes.get('caption', '')
-            
+            # If parsing/image lookup failed, keep an explicit placeholder.
+            name = image_block.get('name', 'image') if image_block else block.attributes.get('name', 'image')
+            caption = image_block.get('caption', '') if image_block else block.attributes.get('caption', '')
             return f"\\textit{{[Image: {name}]}}\\\\[0.2cm]\n\\textit{{{caption}}}"
         else:
             return f"\\textit{{[Include: {component}]}}"
+
+    def _relative_image_path(self, scp_slug: str, filename: str, subdir: str = "") -> str:
+        """Build an image path relative to the main LaTeX directory."""
+        image_path = self.output_dir / "images" / scp_slug
+        if subdir:
+            image_path = image_path / subdir.strip("/")
+        image_path = image_path / filename
+        relative_path = os.path.relpath(image_path, self.latex_dir)
+        return relative_path.replace(os.sep, "/")
+
+    def _parse_image_block_component(self, component: str) -> Dict[str, str]:
+        """Parse component:image-block include strings into key/value params."""
+        if not component or "component:image-block" not in component:
+            return {}
+
+        params: Dict[str, str] = {}
+        raw_params = component.split("component:image-block", 1)[1].strip()
+        if not raw_params:
+            return params
+
+        for field in raw_params.split('|'):
+            field = field.strip()
+            if not field or '=' not in field:
+                continue
+            key, value = field.split('=', 1)
+            params[key.strip().lower()] = value.strip()
+
+        return params
+
+    def _find_image_entry(self, scp_number: str, filename: str) -> Dict[str, Any]:
+        """Find image metadata entry for filename under a given SCP."""
+        for image in self.image_map.get(scp_number, []):
+            if image.get('filename', '').lower() == filename.lower():
+                return image
+        return {}
+
+    def _image_width_from_block(self, raw_width: str) -> str:
+        """Convert wiki width hints (e.g. 150px) to LaTeX textwidth fractions."""
+        default_width = "0.36\\textwidth"
+        if not raw_width:
+            return default_width
+
+        width = raw_width.strip().lower()
+        if width.endswith('px'):
+            try:
+                px = int(width[:-2])
+                fraction = max(0.22, min(0.62, px / 420.0))
+                return f"{fraction:.2f}\\textwidth"
+            except ValueError:
+                return default_width
+
+        if width.endswith('%'):
+            try:
+                pct = float(width[:-1])
+                fraction = max(0.22, min(0.8, pct / 100.0))
+                return f"{fraction:.2f}\\textwidth"
+            except ValueError:
+                return default_width
+
+        return raw_width
     
     def _process_text_content(self, text: str) -> str:
         """Process and format text content for LaTeX"""
@@ -477,6 +573,14 @@ class EnhancedLaTeXConverter:
         # First clean wikidot markup
         text = self._clean_wikidot_content(text)
 
+        # Convert runs of █ characters to placeholders (protected from escaping)
+        redact_placeholders = []
+        def _redact_replace(m):
+            idx = len(redact_placeholders)
+            redact_placeholders.append(len(m.group(0)))
+            return f'REDACTPLACEHOLDER{idx}ENDPLACEHOLDER'
+        text = re.sub(r'█+', _redact_replace, text)
+
         # LaTeX special characters - order matters!
         replacements = [
             ('\\\\', '\\textbackslash{}'),
@@ -491,8 +595,6 @@ class EnhancedLaTeXConverter:
             ('~', '\\textasciitilde{}'),
             ('<', '\\textless{}'),
             ('>', '\\textgreater{}'),
-            # Unicode redaction characters - convert to black boxes
-            ('█', '\\blackbox{}'),
             # Greek letters commonly seen
             ('ρ', '$\\rho$'),
             ('α', '$\\alpha$'),
@@ -505,6 +607,13 @@ class EnhancedLaTeXConverter:
 
         for char, replacement in replacements:
             text = text.replace(char, replacement)
+
+        # Restore redaction placeholders as \redact{N} commands
+        for idx, count in enumerate(redact_placeholders):
+            text = text.replace(
+                f'REDACTPLACEHOLDER{idx}ENDPLACEHOLDER',
+                f'\\redact{{{count}}}'
+            )
 
         return text
     

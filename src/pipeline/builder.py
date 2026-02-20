@@ -51,8 +51,8 @@ class PipelineConfig:
     
     # LaTeX options
     document_class: str = "book"
-    font_size: str = "12pt"
-    paper_size: str = "letterpaper"
+    font_size: str = "10pt"
+    paper_size: str = "letterpaper"  # Theme overrides actual geometry
     use_rpg_styling: bool = False  # Deprecated — use theme instead
     theme: str = "redacted"  # Theme name: "redacted", "scpbase", etc.
 
@@ -290,7 +290,11 @@ class SCPBookBuilder:
         print("\n7. Compiling to PDF...")
         from pipeline.compile_latex import compile_latex_to_pdf
         
-        success, pdf_path, error = compile_latex_to_pdf(latex_file)
+        success, pdf_path, error = compile_latex_to_pdf(
+            latex_file,
+            output_pdf_dir=self.config.pdf_dir,
+            build_dir=os.path.join(self.config.latex_dir, "build"),
+        )
         if success:
             print(f"   Generated PDF: {pdf_path}")
             pdf_size = os.path.getsize(pdf_path)

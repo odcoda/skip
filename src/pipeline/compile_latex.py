@@ -39,8 +39,9 @@ def compile_latex_to_pdf(latex_file, output_pdf_dir=None, build_dir=None, themes
     if build_dir is None:
         build_dir = os.path.join(latex_dir, 'build')
     if output_pdf_dir is None:
-        base_dir = Path(latex_file).parent.parent.parent
-        output_pdf_dir = base_dir / "output" / "pdf"
+        latex_path = Path(latex_file).resolve()
+        output_root = next((p for p in latex_path.parents if p.name == "output"), latex_path.parent)
+        output_pdf_dir = output_root / "pdf"
     
     # Create directories
     os.makedirs(build_dir, exist_ok=True)
