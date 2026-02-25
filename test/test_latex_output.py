@@ -20,6 +20,30 @@ from pathlib import Path
 import pytest
 
 
+def assert_matches_expected(actual_latex: str, expected_file: Path, label: str):
+    """Compare output with expected text and emit .corrected files on mismatch."""
+    expected_latex = expected_file.read_text(encoding='utf-8')
+    if actual_latex == expected_latex:
+        return
+
+    corrected_file = expected_file.with_suffix(expected_file.suffix + ".corrected")
+    corrected_file.write_text(actual_latex, encoding='utf-8')
+
+    diff = ''.join(
+        difflib.unified_diff(
+            expected_latex.splitlines(keepends=True),
+            actual_latex.splitlines(keepends=True),
+            fromfile=str(expected_file),
+            tofile=str(corrected_file),
+        )
+    )
+    pytest.fail(
+        f"\nLaTeX output mismatch for {label}\n"
+        f"Saved corrected output to: {corrected_file}\n"
+        f"{'=' * 60}\n{diff}\n{'=' * 60}"
+    )
+
+
 class TestLatexDiff:
     """Test that generated LaTeX matches expected output."""
 
@@ -44,29 +68,7 @@ class TestLatexDiff:
             if not expected_file.exists():
                 pytest.skip(f"Expected file {expected_file} not found. Run 'pytest --generate-expected' to create it.")
 
-            with open(expected_file, 'r', encoding='utf-8') as f:
-                expected_latex = f.read()
-
-            # Compare line by line
-            actual_lines = actual_latex.splitlines(keepends=True)
-            expected_lines = expected_latex.splitlines(keepends=True)
-
-            diff = list(difflib.unified_diff(
-                expected_lines,
-                actual_lines,
-                fromfile=f"expected/{test_file.stem}.tex",
-                tofile=f"generated/{test_file.stem}.tex",
-                lineterm=''
-            ))
-
-            if diff:
-                diff_output = ''.join(diff)
-                pytest.fail(
-                    f"\nLaTeX output mismatch for {test_file.name}:\n"
-                    f"{'=' * 60}\n"
-                    f"{diff_output}\n"
-                    f"{'=' * 60}"
-                )
+            assert_matches_expected(actual_latex, expected_file, test_file.name)
 
     @pytest.mark.parametrize("fixture_name", [
         "scp-test-001",
@@ -89,23 +91,7 @@ class TestLatexDiff:
         doc = parser.parse_file(str(test_file))
         actual_latex = converter.generate_document_latex(doc)
 
-        with open(expected_file, 'r', encoding='utf-8') as f:
-            expected_latex = f.read()
-
-        # Generate diff
-        actual_lines = actual_latex.splitlines(keepends=True)
-        expected_lines = expected_latex.splitlines(keepends=True)
-
-        diff = list(difflib.unified_diff(
-            expected_lines,
-            actual_lines,
-            fromfile=f"expected/{fixture_name}.tex",
-            tofile=f"generated/{fixture_name}.tex",
-        ))
-
-        if diff:
-            diff_output = ''.join(diff)
-            pytest.fail(f"\n{diff_output}")
+        assert_matches_expected(actual_latex, expected_file, fixture_name)
 
 
 class TestLatexCompilation:
@@ -184,6 +170,7 @@ class TestLatexCompilation:
 \\newcommand{{\\speaker}}[1]{{\\textbf{{#1:}} }}
 \\newcommand{{\\logheader}}[1]{{\\textbf{{#1}}\\par}}
 \\newcommand{{\\blackbox}}{{\\rule{{1ex}}{{1.2ex}}}}
+\\newcommand{{\\redact}}[1]{{\\rule{{#1ex}}{{1.2ex}}}}
 
 \\begin{{document}}
 
@@ -214,7 +201,7 @@ class TestLatexCompilation:
         # Wrap in document
         full_latex = self._wrap_as_document(article_latex)
 
-        # Compile (output saved to tests/output/ for inspection)
+        # Compile (output saved to test/output/ for inspection)
         success, error = self._compile_latex(full_latex, test_output_dir, f"{fixture_name}.tex")
 
         if not success:
@@ -265,6 +252,20 @@ class TestBookCompilation:
         )
         converter = EnhancedLaTeXConverter(config)
 
+        # Copy theme assets required by generated preamble.
+        themes_src = Path(__file__).parent.parent / "src" / "latex" / "themes"
+        for sty in themes_src.glob("*.sty"):
+            target = book_dir / sty.name
+            target.write_text(sty.read_text(encoding='utf-8'), encoding='utf-8')
+
+        graphics_src = themes_src / "graphics"
+        graphics_dst = book_dir / "graphics"
+        if graphics_src.exists():
+            graphics_dst.mkdir(exist_ok=True)
+            for tex_file in graphics_src.glob("*.tex"):
+                target = graphics_dst / tex_file.name
+                target.write_text(tex_file.read_text(encoding='utf-8'), encoding='utf-8')
+
         # Create articles directory
         articles_dir = book_dir / "articles"
         articles_dir.mkdir(exist_ok=True)
@@ -292,7 +293,7 @@ class TestBookCompilation:
         with open(book_file, 'w', encoding='utf-8') as f:
             f.write(book_latex)
 
-        # Compile (run twice for ToC) - output saved to tests/output/book/ for inspection
+        # Compile (run twice for ToC) - output saved to test/output/book/ for inspection
         for run in range(2):
             result = subprocess.run(
                 ['pdflatex', '-interaction=nonstopmode', '-halt-on-error', 'test_book.tex'],
@@ -331,8 +332,8 @@ def generate_expected_files():
     from latex.enhanced_converter import EnhancedLaTeXConverter
     from pipeline.builder import PipelineConfig
 
-    fixtures_dir = Path(__file__).parent / "fixtures"
-    expected_dir = Path(__file__).parent / "expected"
+    fixtures_dir = Path(__file__).parent / "data" / "input"
+    expected_dir = Path(__file__).parent / "data" / "expected"
     expected_dir.mkdir(exist_ok=True)
 
     parser = EnhancedWikidotParser()

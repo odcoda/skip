@@ -129,7 +129,7 @@ def analyze_addenda_patterns(content):
 def analyze_all_scps():
     """Analyze all downloaded SCP files"""
     
-    base_dir = Path(__file__).parent.parent.parent
+    base_dir = Path(__file__).parent.parent
     downloads_dir = base_dir / "output" / "downloads"
     
     results = {
@@ -293,7 +293,7 @@ def main():
     print_analysis_report(results)
     
     # Save detailed results
-    output_file = Path(__file__).parent.parent.parent / "output" / "scp_pattern_analysis.json"
+    output_file = Path(__file__).parent.parent / "output" / "scp_pattern_analysis.json"
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(results, f, indent=2, default=str)
     

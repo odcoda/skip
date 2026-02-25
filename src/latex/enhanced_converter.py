@@ -119,9 +119,13 @@ class EnhancedLaTeXConverter:
 
         # Include each SCP document in this chapter
         for document in chapter['documents']:
-            if document.scp_number in latex_files:
+            key = document.metadata.get('page_slug') if getattr(document, 'metadata', None) else None
+            if not key:
+                key = document.scp_number
+
+            if key in latex_files:
                 # Use include for the individual LaTeX file
-                include_path = latex_files[document.scp_number]
+                include_path = latex_files[key]
                 # Remove .tex extension for include command
                 include_name = include_path.replace('.tex', '')
                 latex += f"\\input{{{include_name}}}\n\n"
@@ -387,11 +391,21 @@ class EnhancedLaTeXConverter:
             return f"\\textit{{[Include: {component}]}}"
 
     def _relative_image_path(self, scp_slug: str, filename: str, subdir: str = "") -> str:
-        """Build an image path relative to the main LaTeX directory."""
-        image_path = self.output_dir / "images" / scp_slug
+        """Build an image path relative to the main LaTeX directory.
+
+        Prefer output/assets (new location), fall back to output/images (legacy).
+        """
+        base_new = self.output_dir / "assets" / scp_slug
+        base_old = self.output_dir / "images" / scp_slug
         if subdir:
-            image_path = image_path / subdir.strip("/")
-        image_path = image_path / filename
+            clean_subdir = subdir.strip("/")
+            base_new = base_new / clean_subdir
+            base_old = base_old / clean_subdir
+
+        new_path = base_new / filename
+        old_path = base_old / filename
+        image_path = new_path if new_path.exists() or not old_path.exists() else old_path
+
         relative_path = os.path.relpath(image_path, self.latex_dir)
         return relative_path.replace(os.sep, "/")
 

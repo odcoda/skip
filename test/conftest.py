@@ -12,9 +12,11 @@ SRC_DIR = PROJECT_ROOT / "src"
 sys.path.insert(0, str(SRC_DIR))
 
 # Test directories
-FIXTURES_DIR = Path(__file__).parent / "fixtures"
-EXPECTED_DIR = Path(__file__).parent / "expected"
-OUTPUT_DIR = Path(__file__).parent / "output"
+TEST_ROOT = Path(__file__).parent
+DATA_DIR = TEST_ROOT / "data"
+FIXTURES_DIR = DATA_DIR / "input"
+EXPECTED_DIR = DATA_DIR / "expected"
+OUTPUT_DIR = TEST_ROOT / "output"
 
 
 @pytest.fixture

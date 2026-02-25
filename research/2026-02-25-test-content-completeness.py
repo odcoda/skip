@@ -83,7 +83,7 @@ def test_content_completeness():
     """Test that parsed content matches original content reasonably well"""
     
     # Paths
-    base_dir = Path(__file__).parent.parent.parent
+    base_dir = Path(__file__).parent.parent
     original_file = base_dir / "output" / "downloads" / "scp-5370.txt"
     json_file = base_dir / "output" / "intermediate" / "scp-5370.json"
     
@@ -150,7 +150,7 @@ def test_content_completeness():
 def analyze_parsing_issues():
     """Analyze specific parsing issues to help with debugging"""
 
-    base_dir = Path(__file__).parent.parent.parent
+    base_dir = Path(__file__).parent.parent
     original_file = base_dir / "output" / "downloads" / "scp-5370.txt"
     
     with open(original_file, 'r', encoding='utf-8') as f:

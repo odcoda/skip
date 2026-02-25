@@ -163,3 +163,16 @@ Verification:
 - Ran PDF-to-image script on the generated PDF:
   - `venv/bin/python src/tools/pdf_viewer.py output/pdf/scp_book.pdf -o output/preview/volume1_check_after -p 11 12 15 16 26 29 32 33 36 38`
 - Confirmed right-aligned images now render on target pages (e.g. SCP-087 page 11, SCP-173 page 15, SCP-682 page 26, SCP-963 page 36).
+
+## 2026-02-25 architecture-driven pipeline reorg
+Implemented the architecture.md reorganization and orchestration updates:
+- moved `tests/` to `test/` and reorganized fixtures/expected into `test/data/input` + `test/data/expected` (with `git mv`)
+- moved one-off/manual scripts into dated `research/` files (with `git mv`) and fixed their project-root/import paths
+- rewrote `src/pipeline/builder.py` as dependency-aware orchestration with manual overrides, `output/deps/*.yaml`, `output/assets/`, and `diffs/` generation for `.txt`/`.tex`
+- updated downloader to expose static viewsource extraction and to save full page HTML in `output/raw_downloads/`
+- updated tests for new layout, added downloader static-HTML test, and added `test/accept-corrections.sh`
+- updated README and `.gitignore` for the new structure
+Validated with:
+- `uv run --with pytest --with requests --with beautifulsoup4 pytest test -q` (12 passed)
+Up next:
+- wire web UI status endpoints to show deps/assets/override state explicitly

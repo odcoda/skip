@@ -41,6 +41,7 @@ class SCPDownloader:
         self.raw_output_dir = raw_output_dir or str(DEFAULT_RAW_DOWNLOADS_DIR)
         self.session = requests.Session()
         self.wikidot_token7 = None
+        self.last_page_html = None
         
         # Set up a realistic user agent
         self.session.headers.update({
@@ -104,6 +105,7 @@ class SCPDownloader:
         url = f"https://scp-wiki.wikidot.com/{page_unix_name}"
         response = self.session.get(url)
         response.raise_for_status()
+        self.last_page_html = response.text
 
         # Extract wikidot_token7 from cookies (set when visiting any page)
         for cookie in self.session.cookies:
@@ -118,6 +120,20 @@ class SCPDownloader:
 
         page_id = page_id_match.group(1)
         return page_id, page_unix_name
+
+    @staticmethod
+    def extract_source_from_viewsource_html(html_content):
+        """Extract wikidot source text from the quickmodule HTML body."""
+        soup = BeautifulSoup(html_content, 'html.parser')
+
+        # The source code is in a div with class="page-source"
+        source_div = soup.find('div', class_='page-source')
+        if not source_div:
+            raise ValueError("Could not find source code in the response")
+
+        # Get the text content and unescape HTML entities
+        source_text = source_div.get_text()
+        return html.unescape(source_text)
     
     def get_page_source(self, page_id):
         """
@@ -162,17 +178,7 @@ class SCPDownloader:
         # Extract the HTML content from the response
         html_content = json_response.get('body', '')
         
-        # Parse the HTML to extract the actual source code
-        soup = BeautifulSoup(html_content, 'html.parser')
-        
-        # The source code is in a div with class="page-source"
-        source_div = soup.find('div', class_='page-source')
-        if not source_div:
-            raise ValueError("Could not find source code in the response")
-        
-        # Get the text content and unescape HTML entities
-        source_text = source_div.get_text()
-        parsed_source = html.unescape(source_text)
+        parsed_source = self.extract_source_from_viewsource_html(html_content)
         
         return parsed_source, html_content
     
@@ -207,10 +213,10 @@ class SCPDownloader:
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(parsed_source)
         
-        # Save raw HTML to raw downloads directory
+        # Save raw HTML page to raw downloads directory (full page when available)
         raw_output_path = os.path.join(self.raw_output_dir, raw_output_filename)
         with open(raw_output_path, 'w', encoding='utf-8') as f:
-            f.write(raw_html)
+            f.write(self.last_page_html if self.last_page_html else raw_html)
         
         print(f"Saved parsed source to {output_path}")
         print(f"Saved raw HTML to {raw_output_path}")

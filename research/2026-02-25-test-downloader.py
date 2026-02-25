@@ -10,12 +10,12 @@ import os
 import sys
 from pathlib import Path
 
-# Add parent to path to allow running from anywhere
-sys.path.insert(0, str(Path(__file__).parent))
+# Add src to path to allow running from anywhere
+PROJECT_ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from scp_downloader import SCPDownloader
 
-PROJECT_ROOT = Path(__file__).parent.parent
 OUTPUT_DIR = PROJECT_ROOT / "output"
 TEST_DOWNLOADS = OUTPUT_DIR / "test_downloads"
 

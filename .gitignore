@@ -2,7 +2,10 @@
 output/
 
 # Test output (generated PDFs for inspection)
-tests/output/
+test/output/
+
+# Manual override diffs (generated)
+diffs/
 
 # Python cache
 __pycache__/

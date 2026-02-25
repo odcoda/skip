@@ -19,15 +19,19 @@ skip/
 ├── README.md                    # This file
 ├── CLAUDE.md                    # Development notes and progress
 ├── .gitignore                   # Git ignore patterns
-├── downloads/                   # Downloaded wikidot source files (.txt)
-├── raw_downloads/              # Raw HTML API responses (.html)
+├── GOALS.md                     # Project goals and requirements
+├── manual/                      # Optional manual overrides (parallel to output/)
 ├── output/
-│   ├── intermediate/           # Structured JSON representations
+│   ├── downloads/               # Downloaded wikidot source files (.txt)
+│   ├── raw_downloads/           # Downloaded full page HTML files (.html)
+│   ├── intermediate/            # Parsed JSON representations
+│   ├── deps/                    # Dependency manifests (.yaml)
+│   ├── assets/                  # Downloaded media and unparsed assets
 │   ├── latex/
-│   │   ├── articles/          # Individual LaTeX files for each SCP
-│   │   ├── build/             # LaTeX compilation artifacts
-│   │   └── scp_book.tex       # Main book file with includes
-│   └── pdf/                   # Final compiled PDF files
+│   │   ├── articles/            # Individual LaTeX files
+│   │   └── scp_book.tex         # Main book file with includes
+│   └── pdf/                     # Final compiled PDFs
+├── diffs/                       # Auto-vs-manual diffs for .txt/.tex (generated)
 ├── src/
 │   ├── scp_downloader.py      # Core download functionality
 │   ├── parsers/
@@ -37,14 +41,15 @@ skip/
 │   │   ├── enhanced_converter.py       # LaTeX generator with semantic formatting
 │   │   └── converter.py               # Basic converter (legacy)
 │   └── pipeline/
-│       ├── builder.py         # Main build pipeline
+│       ├── builder.py         # Main orchestration/build pipeline
 │       └── compile_latex.py   # PDF compilation utilities
-├── examples/
-│   └── single_scp/
-│       ├── analyze_scp_patterns.py     # Pattern analysis tools
-│       ├── test_content_completeness.py # Content retention testing
-│       └── test_latex_compilation.py   # LaTeX testing utilities
-└── test_downloader.py         # Basic downloader tests
+├── research/                  # One-off analysis/manual scripts (dated)
+└── test/
+    ├── data/
+    │   ├── input/            # Test inputs
+    │   └── expected/         # Golden outputs
+    ├── accept-corrections.sh # Promote *.corrected to expected outputs
+    └── test_*.py             # Unit/integration tests
 ```
 
 ## Installation
@@ -85,23 +90,16 @@ python src/scp_downloader.py 5360 --range --end 5370
 ### 2. Build Complete Book
 
 ```bash
-cd src
-python -c "
-from pipeline.builder import SCPBookBuilder, PipelineConfig
-
-# Configure and build
-config = PipelineConfig(input_dir='../downloads')
-builder = SCPBookBuilder(config)
-builder.build_book()
-"
+python src/pipeline/builder.py
 ```
 
 This will:
-1. Parse all downloaded SCPs into structured format
-2. Save intermediate JSON files in `output/intermediate/`
-3. Generate individual LaTeX files in `output/latex/articles/`
-4. Create main book file `output/latex/scp_book.tex`
-5. Compile to PDF at `output/pdf/scp_book.pdf`
+1. Resolve missing pages (download + dependency closure)
+2. Parse source files into `output/intermediate/*.json`
+3. Generate dependency manifests in `output/deps/*.yaml`
+4. Download media/unparsed assets to `output/assets/`
+5. Generate LaTeX in `output/latex/` and compile PDFs in `output/pdf/`
+6. If matching files exist under `manual/`, use those overrides and write diffs to `diffs/`
 
 ## Advanced Usage
 
@@ -111,11 +109,13 @@ This will:
 from pipeline.builder import SCPBookBuilder, PipelineConfig
 
 config = PipelineConfig(
-    input_dir='custom_downloads',
+    output_dir='custom_output',
+    input_dir='custom_output/downloads',
     title='My Custom SCP Collection',
     author='My Name',
     max_scps_per_chapter=5,
-    use_rpg_styling=True  # Enable fantasy RPG styling
+    resolve_dependencies=True,
+    download_assets=True
 )
 
 builder = SCPBookBuilder(config)
@@ -126,7 +126,7 @@ builder.build_book()
 
 ```python
 # Parse specific files
-documents = builder.parse_all_files(['downloads/scp-173.txt'])
+documents = builder.parse_all_files(['output/downloads/scp-173.txt'])
 
 # Generate only LaTeX without compilation
 latex_files = builder.generate_individual_latex_files(documents)
@@ -142,10 +142,10 @@ success, pdf_path, error = compile_latex_to_pdf('output/latex/scp_book.tex')
 
 ```python
 # Analyze SCP patterns and structure
-python examples/single_scp/analyze_scp_patterns.py
+python research/2026-02-25-analyze-scp-patterns.py
 
 # Test content completeness
-python examples/single_scp/test_content_completeness.py
+python research/2026-02-25-test-content-completeness.py
 ```
 
 ## Architecture
@@ -245,7 +245,7 @@ pdflatex scp_book.tex
 python -c "
 from parsers.enhanced_wikidot_parser import EnhancedWikidotParser
 parser = EnhancedWikidotParser()
-doc = parser.parse_file('downloads/scp-173.txt')
+doc = parser.parse_file('output/downloads/scp-173.txt')
 print(f'Parsed {len(doc.sections)} sections')
 "
 ```

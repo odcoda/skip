@@ -27,7 +27,7 @@ def test_latex_compilation(latex_file):
     os.makedirs(build_dir, exist_ok=True)
     
     # Create PDF output directory
-    base_dir = Path(latex_file).parent.parent.parent  # Go up to project root
+    base_dir = Path(latex_file).parent.parent  # Go up to project root
     pdf_dir = base_dir / "output" / "pdf"
     os.makedirs(pdf_dir, exist_ok=True)
     
@@ -142,7 +142,7 @@ def main():
     """Main test function"""
     
     # Find the LaTeX file
-    base_dir = Path(__file__).parent.parent.parent  # Go up to project root
+    base_dir = Path(__file__).parent.parent  # Go up to project root
     latex_file = base_dir / "output" / "latex" / "scp_book.tex"
     
     print("=== LaTeX Compilation Test ===")
