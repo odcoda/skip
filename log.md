@@ -176,3 +176,20 @@ Validated with:
 - `uv run --with pytest --with requests --with beautifulsoup4 pytest test -q` (12 passed)
 Up next:
 - wire web UI status endpoints to show deps/assets/override state explicitly
+
+## 2026-02-25 volume1 flow + orchestration tests
+Improved Volume 1 and pipeline confidence:
+- updated `src/build_volume1.py` to be a robust CLI with defaults for the 14 Heritage pages (plus optional `--with-deps`)
+- default Volume 1 build now targets `output/pdf/volume1/scp_book.pdf` and succeeds end-to-end
+- added media validation in builder to skip invalid/mislabeled files (e.g. non-JPEG content in `.jpg`)
+- added orchestration tests in `test/test_builder_orchestration.py` for:
+  - manual override precedence + diff generation
+  - dependency extraction filtering
+  - dependency manifest parsing
+  - image-map validity filtering
+  - rejecting mismatched downloaded media content
+Validated with:
+- `uv run src/build_volume1.py`
+- `uv run --with pytest --with requests --with beautifulsoup4 pytest test -q` (17 passed)
+Up next:
+- add endpoint-level tests for web API orchestration paths (`/api/parse`, `/api/convert`, `/api/compile`)

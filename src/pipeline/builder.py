@@ -348,7 +348,8 @@ class SCPBookBuilder:
                 new_path = new_path / filename
                 old_path = old_path / filename
 
-                if new_path.exists() or old_path.exists():
+                candidate = new_path if new_path.exists() else old_path
+                if candidate.exists() and self._is_valid_media_file(candidate):
                     existing.append(img)
 
             if existing and slug.startswith("scp-"):
@@ -721,6 +722,9 @@ class SCPBookBuilder:
         try:
             response = requests.get(url, timeout=30)
             response.raise_for_status()
+            if not self._is_valid_media_bytes(filename, response.content):
+                print(f"  Warning: downloaded asset does not match expected media format: {url}")
+                return None
             out_path.write_bytes(response.content)
             return str(out_path.relative_to(self.assets_dir)).replace(os.sep, "/")
         except Exception as exc:
@@ -1157,6 +1161,30 @@ class SCPBookBuilder:
     def _looks_like_asset_name(self, name: str) -> bool:
         lowered = name.lower()
         return any(lowered.endswith(ext) for ext in _MEDIA_EXTENSIONS)
+
+    def _is_valid_media_file(self, path: Path) -> bool:
+        try:
+            blob = path.read_bytes()
+        except Exception:
+            return False
+        return self._is_valid_media_bytes(path.name, blob)
+
+    def _is_valid_media_bytes(self, filename: str, blob: bytes) -> bool:
+        ext = Path(filename).suffix.lower()
+        if ext in {".jpg", ".jpeg"}:
+            return blob.startswith(b"\xff\xd8\xff")
+        if ext == ".png":
+            return blob.startswith(b"\x89PNG\r\n\x1a\n")
+        if ext == ".gif":
+            return blob.startswith((b"GIF87a", b"GIF89a"))
+        if ext == ".webp":
+            return len(blob) >= 12 and blob.startswith(b"RIFF") and blob[8:12] == b"WEBP"
+        if ext == ".bmp":
+            return blob.startswith(b"BM")
+        if ext == ".pdf":
+            return blob.startswith(b"%PDF-")
+        # For audio/video and unknown types, only enforce non-empty.
+        return len(blob) > 0
 
     # -------- CLI --------
 

@@ -1,4 +1,11 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "requests>=2.31",
+#     "beautifulsoup4>=4.12",
+# ]
+# ///
 """
 Build Volume 1: Heritage Collection
 
@@ -22,6 +29,7 @@ Heritage Collection SCPs:
 - SCP-963: Immortality
 """
 
+import argparse
 import sys
 from pathlib import Path
 from typing import List
@@ -76,53 +84,103 @@ class HeritageCollectionBuilder(SCPBookBuilder):
         return documents
 
 
-def get_heritage_files() -> list:
-    """Get list of Heritage Collection file paths"""
+def get_heritage_pages() -> list[str]:
+    """Get canonical page names for Heritage Collection."""
+    return [f"scp-{scp_num}" for scp_num in HERITAGE_COLLECTION]
+
+
+def count_local_heritage_files() -> int:
+    """Count how many Heritage source files already exist locally."""
     downloads_dir = OUTPUT_DIR / "downloads"
-    files = []
+    existing = 0
 
     for scp_num in HERITAGE_COLLECTION:
         filepath = downloads_dir / f"scp-{scp_num}.txt"
         if filepath.exists():
-            files.append(str(filepath))
-        else:
-            print(f"Warning: Missing {filepath}")
-
-    return files
+            existing += 1
+    return existing
 
 
-def build_volume1():
-    """Build Volume 1 using Heritage Collection"""
-
-    # Create Volume 1 specific config
+def build_volume1(
+    with_deps: bool = False,
+    download_missing: bool = True,
+    download_assets: bool = True,
+    compile_pdf: bool = True,
+    theme: str = "redacted",
+) -> str:
+    """Build Volume 1 using Heritage Collection."""
     config = PipelineConfig(
         title="SCP Foundation Archive",
         subtitle="Volume I: The Heritage Collection",
         author="The SCP Foundation",
         latex_dir=str(OUTPUT_DIR / "latex" / "volume1"),
-        pdf_dir=str(OUTPUT_DIR / "pdf"),
+        pdf_dir=str(OUTPUT_DIR / "pdf" / "volume1"),
         intermediate_dir=str(OUTPUT_DIR / "intermediate" / "volume1"),
+        deps_dir=str(OUTPUT_DIR / "deps" / "volume1"),
+        resolve_dependencies=with_deps,
+        download_missing=download_missing,
+        download_assets=download_assets,
+        compile_pdf=compile_pdf,
+        theme=theme,
     )
 
-    # Get Heritage Collection files
-    files = get_heritage_files()
-    if len(files) != 14:
-        print(f"Warning: Expected 14 files, found {len(files)}")
+    pages = get_heritage_pages()
+    local_count = count_local_heritage_files()
 
     print("=" * 50)
     print("Building Volume 1: The Heritage Collection")
     print("=" * 50)
-    print(f"\nArticles: {len(files)}")
-    for f in files:
-        print(f"  - {Path(f).stem}")
+    print(f"\nArticles: {len(pages)}")
+    print(f"Local sources already present: {local_count}/{len(pages)}")
+    print(f"Dependency expansion: {'enabled' if with_deps else 'disabled'}")
+    print(f"Asset downloads: {'enabled' if download_assets else 'disabled'}")
+    print(f"PDF compilation: {'enabled' if compile_pdf else 'disabled'}")
+    for page in pages:
+        print(f"  - {page}")
     print()
 
-    # Build the book with Heritage Collection metadata
     builder = HeritageCollectionBuilder(config)
-    latex_file = builder.build_book(files)
+    return builder.build_book(pages)
 
-    return latex_file
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Build Volume 1 (Heritage Collection) with sensible defaults."
+    )
+    parser.add_argument(
+        "--with-deps",
+        action="store_true",
+        help="Include dependency pages/logs/supplements in addition to the 14 core SCPs.",
+    )
+    parser.add_argument(
+        "--no-download",
+        action="store_true",
+        help="Do not fetch missing source pages.",
+    )
+    parser.add_argument(
+        "--no-assets",
+        action="store_true",
+        help="Do not fetch media assets.",
+    )
+    parser.add_argument(
+        "--skip-pdf",
+        action="store_true",
+        help="Generate LaTeX only; skip pdflatex compilation.",
+    )
+    parser.add_argument(
+        "--theme",
+        default="redacted",
+        help="Theme package name for LaTeX generation.",
+    )
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
-    build_volume1()
+    args = parse_args()
+    build_volume1(
+        with_deps=args.with_deps,
+        download_missing=not args.no_download,
+        download_assets=not args.no_assets,
+        compile_pdf=not args.skip_pdf,
+        theme=args.theme,
+    )

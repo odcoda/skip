@@ -101,6 +101,20 @@ This will:
 5. Generate LaTeX in `output/latex/` and compile PDFs in `output/pdf/`
 6. If matching files exist under `manual/`, use those overrides and write diffs to `diffs/`
 
+### 3. Build Volume 1 (Heritage Collection)
+
+```bash
+# Fast/stable default: only the 14 Heritage SCPs
+uv run src/build_volume1.py
+
+# Include dependency pages/logs too
+uv run src/build_volume1.py --with-deps
+```
+
+Output paths:
+- LaTeX: `output/latex/volume1/scp_book.tex`
+- PDF: `output/pdf/volume1/scp_book.pdf`
+
 ## Advanced Usage
 
 ### Custom Configuration
