@@ -635,7 +635,7 @@ class EnhancedLaTeXConverter:
     def _generate_legacy_scp_section(self, doc) -> str:
         """Generate LaTeX for legacy document format (fallback)"""
         # This would use the old converter logic
-        from latex.converter import LaTeXConverter
+        from latex_pipeline.converter import LaTeXConverter
         old_converter = LaTeXConverter(self.config)
         return old_converter._generate_scp_basic_style(doc)
 

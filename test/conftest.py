@@ -60,7 +60,7 @@ def parser():
 @pytest.fixture
 def converter():
     """Return an instance of the enhanced LaTeX converter."""
-    from latex.enhanced_converter import EnhancedLaTeXConverter
+    from latex_pipeline.enhanced_converter import EnhancedLaTeXConverter
     from pipeline.builder import PipelineConfig
     config = PipelineConfig()
     return EnhancedLaTeXConverter(config)

@@ -241,6 +241,7 @@ main {
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
+    min-height: 118px;
 }
 
 .article-card:hover {
@@ -256,7 +257,14 @@ main {
 .article-card .scp-number {
     font-weight: bold;
     font-size: 1.1rem;
+}
+
+.article-card .article-slug {
+    color: var(--text-secondary);
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.75rem;
     margin-bottom: 0.5rem;
+    overflow-wrap: anywhere;
 }
 
 .article-card .status-badges {
@@ -287,9 +295,19 @@ main {
     color: white;
 }
 
+.badge-markdown {
+    background: #38bdf8;
+    color: var(--bg-primary);
+}
+
 .badge-pdf {
     background: var(--bg-tertiary);
     color: var(--text-primary);
+}
+
+.article-preview-btn {
+    margin-top: 0.75rem;
+    width: 100%;
 }
 
 .selection-actions {
@@ -397,6 +415,7 @@ main {
     display: flex;
     gap: 0.5rem;
     margin-bottom: 1rem;
+    flex-wrap: wrap;
 }
 
 .tab {

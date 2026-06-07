@@ -5,9 +5,9 @@ The main orchestration script (`src/pipeline/builder.py`) should run all steps, 
   -> `output/raw_downloads/*.html` (full pages)
 2. Parse:   `src/parsers/enhanced_wikidot_parser.py`
   -> `output/intermediate/*.json` (parsed json file content)
-3. Convert:  `src/latex/enhanced_converter.py`  
+3. Convert:  `src/latex_pipeline/enhanced_converter.py`  
   -> `output/latex/*.tex` 
-4. Compile: `src/pipeline/compile_latex.py`
+4. Compile: `src/latex_pipeline/compile_latex.py`
   -> `output/pdf/*.pdf`
 
 ## manual overrides and diffs
@@ -24,7 +24,7 @@ Both of these types of generated output should also support manual overrides, si
 All scripts of the control flow have simple tests which feed in an input and compare the output with an expected output, except the downloader which hits an external endpoint. For the downloader we have a static html page and we just test the wikidot source extraction. The relevant tests are in `test/` and the corresponding input/output data are in `test/data/`. If a test output doesn’t match what’s expected, show the diff and save the actual output to a .corrected file; the user can easily run the accept-corrections.sh script to update the outputs to match the corrections.
 
 ## legacy files (to delete)
-- Likely unused/legacy (not used by current pipeline/tests; kept as fallback): `src/parsers/wikidot_parser.py`, `src/latex/converter.py` (only referenced if you pass legacy docs to `EnhancedLaTeXConverter._generate_legacy_scp_section`)
+- Likely unused/legacy (not used by current pipeline/tests; kept as fallback): `src/parsers/wikidot_parser.py`, `src/latex_pipeline/converter.py` (only referenced if you pass legacy docs to `EnhancedLaTeXConverter._generate_legacy_scp_section`)
 
 ## web launcher
 - Web launcher: `src/run_web.py` -> `src/web/app.py`
@@ -48,5 +48,5 @@ Any one-off scripts or notebooks which do things like e.g. examine a subset of a
   - `requests`, `beautifulsoup4` -> `src/scp_downloader.py`
   - `flask` -> `src/web/app.py`
   - `pymupdf` (fitz), optional `pdf2image`, optional ImageMagick `convert`, optional `pdfinfo` -> `src/web/pdf_utils.py`
-  - `pdflatex` CLI -> `src/pipeline/compile_latex.py`, `src/tools/test_latex_compilation.py`, `tests/test_latex_output.py`
+  - `pdflatex` CLI -> `src/latex_pipeline/compile_latex.py`, `src/tools/test_latex_compilation.py`, `tests/test_latex_output.py`
 - Test deps: `pytest` -> `tests/test_latex_output.py`

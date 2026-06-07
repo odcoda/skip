@@ -45,7 +45,9 @@ function cacheElements() {
 
     elements.articleModal = document.getElementById('article-modal');
     elements.articleModalTitle = document.getElementById('article-modal-title');
-    elements.articleRaw = document.getElementById('article-raw');
+    elements.articleRawHtml = document.getElementById('article-raw-html');
+    elements.articleSource = document.getElementById('article-source');
+    elements.articleMarkdown = document.getElementById('article-markdown');
     elements.articleParsed = document.getElementById('article-parsed');
     elements.articleLatex = document.getElementById('article-latex');
 
@@ -139,6 +141,16 @@ function updateStats(data) {
     elements.statPdf.textContent = data.pdf_compiled;
 }
 
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    }[char]));
+}
+
 function renderArticles() {
     const showDownloaded = elements.filterDownloaded.checked;
     const showNotDownloaded = elements.filterNotDownloaded.checked;
@@ -157,16 +169,20 @@ function renderArticles() {
     }
 
     elements.articlesContainer.innerHTML = filtered.map(article => `
-        <div class="article-card ${selectedArticles.has(article.number) ? 'selected' : ''}"
-             data-scp="${article.number}"
-             onclick="toggleArticle('${article.number}', event)">
-            <div class="scp-number">SCP-${article.number}</div>
+        <div class="article-card ${selectedArticles.has(article.slug) ? 'selected' : ''}"
+             data-page="${escapeHtml(article.slug)}"
+             onclick="toggleArticle(this.dataset.page, event)">
+            <div class="scp-number">${escapeHtml(article.display_name || article.slug)}</div>
+            <div class="article-slug">${escapeHtml(article.slug)}</div>
             <div class="status-badges">
-                ${article.downloaded ? '<span class="badge badge-downloaded">DL</span>' : ''}
+                ${article.raw_html ? '<span class="badge badge-downloaded">HTML</span>' : ''}
+                ${article.downloaded ? '<span class="badge badge-downloaded">SRC</span>' : ''}
                 ${article.parsed ? '<span class="badge badge-parsed">JSON</span>' : ''}
+                ${article.markdown_available ? '<span class="badge badge-markdown">MD</span>' : ''}
                 ${article.latex_generated ? '<span class="badge badge-latex">TEX</span>' : ''}
                 ${article.pdf_compiled ? '<span class="badge badge-pdf">PDF</span>' : ''}
             </div>
+            <button class="btn btn-small article-preview-btn" onclick="openArticleDetail(this.closest('.article-card').dataset.page, event)">Preview</button>
         </div>
     `).join('');
 
@@ -174,6 +190,9 @@ function renderArticles() {
 }
 
 function toggleArticle(scpNum, event) {
+    if (event.target.closest('button')) {
+        return;
+    }
     // Double-click opens detail
     if (event.detail === 2) {
         openArticleDetail(scpNum);
@@ -195,7 +214,7 @@ function updateSelectionUI() {
 }
 
 function selectAll() {
-    articles.forEach(a => selectedArticles.add(a.number));
+    articles.forEach(a => selectedArticles.add(a.slug));
     renderArticles();
 }
 
@@ -216,7 +235,7 @@ async function handleDownload() {
         const [start, end] = input.split('-').map(s => parseInt(s.trim()));
         payload = { start, end };
     } else {
-        payload = { scp_numbers: [input] };
+        payload = { page_slugs: [input] };
     }
 
     try {
@@ -230,9 +249,9 @@ async function handleDownload() {
 
         result.results.forEach(r => {
             if (r.success) {
-                log(`  SCP-${r.scp_number}: OK`, 'success');
+                log(`  ${r.display_name || r.slug}: OK`, 'success');
             } else {
-                log(`  SCP-${r.scp_number}: ${r.error}`, 'error');
+                log(`  ${r.slug}: ${r.error}`, 'error');
             }
         });
 
@@ -265,13 +284,13 @@ async function handleSearch() {
 
 // Parse articles
 async function parseArticles(all) {
-    const scpNumbers = all ? [] : Array.from(selectedArticles);
-    log(`Parsing ${all ? 'all' : scpNumbers.length} articles...`, 'info');
+    const pageSlugs = all ? [] : Array.from(selectedArticles);
+    log(`Parsing ${all ? 'all' : pageSlugs.length} pages...`, 'info');
 
     try {
         const result = await apiCall('/api/parse', {
             method: 'POST',
-            body: JSON.stringify(all ? { all: true } : { scp_numbers: scpNumbers })
+            body: JSON.stringify(all ? { all: true } : { page_slugs: pageSlugs })
         });
 
         log(`Parsed ${result.successful}/${result.total} articles`,
@@ -285,13 +304,13 @@ async function parseArticles(all) {
 
 // Convert to LaTeX
 async function convertArticles(all) {
-    const scpNumbers = all ? [] : Array.from(selectedArticles);
-    log(`Converting ${all ? 'all' : scpNumbers.length} articles to LaTeX...`, 'info');
+    const pageSlugs = all ? [] : Array.from(selectedArticles);
+    log(`Generating LaTeX for ${all ? 'all' : pageSlugs.length} pages...`, 'info');
 
     try {
         const result = await apiCall('/api/convert', {
             method: 'POST',
-            body: JSON.stringify(all ? { all: true } : { scp_numbers: scpNumbers })
+            body: JSON.stringify(all ? { all: true } : { page_slugs: pageSlugs })
         });
 
         log(`Converted ${result.successful}/${result.total} articles`,
@@ -391,17 +410,27 @@ function closePdfModal() {
 }
 
 // Article detail modal
-async function openArticleDetail(scpNum) {
-    elements.articleModalTitle.textContent = `SCP-${scpNum}`;
-    elements.articleRaw.textContent = 'Loading...';
+async function openArticleDetail(pageSlug, event = null) {
+    if (event) {
+        event.stopPropagation();
+    }
+
+    const summary = articles.find(article => article.slug === pageSlug);
+    elements.articleModalTitle.textContent = summary?.display_name || pageSlug;
+    elements.articleRawHtml.textContent = 'Loading...';
+    elements.articleSource.textContent = 'Loading...';
+    elements.articleMarkdown.textContent = 'Loading...';
     elements.articleParsed.textContent = 'Loading...';
     elements.articleLatex.textContent = 'Loading...';
+    activateArticleTab('raw-html');
     elements.articleModal.classList.add('active');
 
     try {
-        const detail = await apiCall(`/api/article/${scpNum}`);
+        const detail = await apiCall(`/api/article/${encodeURIComponent(pageSlug)}`);
 
-        elements.articleRaw.textContent = detail.raw_preview || 'Not downloaded';
+        elements.articleRawHtml.textContent = detail.raw_html_preview || 'Raw HTML not downloaded';
+        elements.articleSource.textContent = detail.source_preview || 'Wikidot source not downloaded';
+        elements.articleMarkdown.textContent = detail.markdown_preview || 'Not parsed';
 
         if (detail.parsed_content) {
             elements.articleParsed.textContent = JSON.stringify(detail.parsed_content, null, 2);
@@ -409,15 +438,30 @@ async function openArticleDetail(scpNum) {
             elements.articleParsed.textContent = 'Not parsed';
         }
 
-        // Load LaTeX
+        if (detail.raw_html) {
+            const rawHtml = await apiCall(`/api/raw-html/${encodeURIComponent(pageSlug)}`);
+            elements.articleRawHtml.textContent = rawHtml.content || detail.raw_html_preview || 'Raw HTML not downloaded';
+        }
+
+        if (detail.downloaded) {
+            const source = await apiCall(`/api/source/${encodeURIComponent(pageSlug)}`);
+            elements.articleSource.textContent = source.content || detail.source_preview || 'Wikidot source not downloaded';
+        }
+
+        if (detail.parsed || detail.downloaded) {
+            const markdown = await apiCall(`/api/markdown/${encodeURIComponent(pageSlug)}`);
+            elements.articleMarkdown.textContent = markdown.content || detail.markdown_preview || 'Markdown unavailable';
+        }
+
+        // Load LaTeX when available as an optional build artifact.
         if (detail.latex_generated) {
-            const latex = await apiCall(`/api/latex/${scpNum}`);
+            const latex = await apiCall(`/api/latex/${encodeURIComponent(pageSlug)}`);
             elements.articleLatex.textContent = latex.content || 'Error loading LaTeX';
         } else {
-            elements.articleLatex.textContent = 'Not converted';
+            elements.articleLatex.textContent = 'LaTeX not generated';
         }
     } catch (error) {
-        elements.articleRaw.textContent = `Error: ${error.message}`;
+        elements.articleRawHtml.textContent = `Error: ${error.message}`;
     }
 }
 
@@ -427,11 +471,13 @@ function closeArticleModal() {
 
 function handleTabClick(event) {
     const tab = event.target;
-    const tabId = tab.dataset.tab;
+    activateArticleTab(tab.dataset.tab);
+}
 
+function activateArticleTab(tabId) {
     // Update active tab
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
+    document.querySelectorAll(`.tab[data-tab="${tabId}"]`).forEach(t => t.classList.add('active'));
 
     // Show corresponding content
     document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
@@ -454,3 +500,4 @@ function log(message, type = 'info') {
 
 // Make toggleArticle available globally
 window.toggleArticle = toggleArticle;
+window.openArticleDetail = openArticleDetail;

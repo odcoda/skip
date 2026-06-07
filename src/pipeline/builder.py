@@ -359,7 +359,7 @@ class SCPBookBuilder:
 
     def copy_theme_files(self):
         """Copy theme files into output/latex for pdflatex resolution."""
-        themes_src = Path(__file__).parent.parent / "latex" / "themes"
+        themes_src = Path(__file__).parent.parent / "latex_pipeline" / "themes"
         themes_dst = self.latex_dir
         themes_dst.mkdir(parents=True, exist_ok=True)
 
@@ -375,7 +375,7 @@ class SCPBookBuilder:
 
     def generate_individual_latex_files(self, documents: List[EnhancedSCPDocument]) -> Dict[str, str]:
         """Generate per-document LaTeX, applying manual overrides when present."""
-        from latex.enhanced_converter import EnhancedLaTeXConverter
+        from latex_pipeline.enhanced_converter import EnhancedLaTeXConverter
 
         self.latex_dir.mkdir(parents=True, exist_ok=True)
         articles_dir = self.latex_dir / "articles"
@@ -408,7 +408,7 @@ class SCPBookBuilder:
 
     def generate_latex(self, chapters: List[Dict[str, Any]], latex_files: Dict[str, str]) -> str:
         """Generate the main book LaTeX file."""
-        from latex.enhanced_converter import EnhancedLaTeXConverter
+        from latex_pipeline.enhanced_converter import EnhancedLaTeXConverter
 
         converter = EnhancedLaTeXConverter(self.config)
         return converter.generate_book_with_includes(chapters, latex_files)
@@ -461,7 +461,7 @@ class SCPBookBuilder:
 
         if self.config.compile_pdf:
             print("\n8. Compiling to PDF...")
-            from pipeline.compile_latex import compile_latex_to_pdf
+            from latex_pipeline.compile_latex import compile_latex_to_pdf
 
             success, pdf_path, error = compile_latex_to_pdf(
                 str(compile_target),

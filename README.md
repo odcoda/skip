@@ -1,16 +1,17 @@
-# SCP Foundation LaTeX Book Generator
+# SCP Foundation Downloader and Book Builder
 
-A comprehensive Python tool to download SCP Foundation wikidot source and convert it into beautifully formatted PDF books using LaTeX. This project provides a complete pipeline from raw wikidot markup to professional-quality typeset documents.
+A Python tool to download SCP Foundation pages, inspect the raw HTML and wikidot source, parse them into structured JSON and Markdown previews, and optionally build PDF books through a separated LaTeX pipeline.
 
 ## Features
 
 - **Download System**: Retrieve wikidot source for individual SCPs or ranges
+- **Web Inspector**: Browse downloaded pages and preview raw HTML, wikidot source, parsed JSON, and scraped Markdown
 - **Semantic Parser**: Enhanced parser that understands SCP structure (containment, description, addenda)
 - **Dialogue Detection**: Automatically formats interview transcripts and dialogue
 - **Quote Block Processing**: Handles nested formatting and experiment logs
+- **Intermediate Format**: Structured JSON and readable Markdown representations for review
 - **LaTeX Generation**: Creates individual LaTeX files plus a main book file
 - **PDF Compilation**: Automated LaTeX compilation with proper error handling
-- **Intermediate Format**: Structured JSON representation for analysis
 
 ## Project Structure
 
@@ -36,13 +37,15 @@ skip/
 │   ├── scp_downloader.py      # Core download functionality
 │   ├── parsers/
 │   │   ├── enhanced_wikidot_parser.py  # Semantic parser with dialogue detection
+│   │   ├── markdown_renderer.py        # Parsed-document Markdown previews
 │   │   └── wikidot_parser.py           # Basic parser (legacy)
-│   ├── latex/
+│   ├── web/                    # Flask download/parse/preview interface
+│   ├── latex_pipeline/         # Optional LaTeX/PDF generation functionality
 │   │   ├── enhanced_converter.py       # LaTeX generator with semantic formatting
-│   │   └── converter.py               # Basic converter (legacy)
+│   │   ├── compile_latex.py            # PDF compilation utilities
+│   │   └── themes/                     # LaTeX theme packages and graphics
 │   └── pipeline/
-│       ├── builder.py         # Main orchestration/build pipeline
-│       └── compile_latex.py   # PDF compilation utilities
+│       └── builder.py         # Main orchestration/build pipeline
 ├── research/                  # One-off analysis/manual scripts (dated)
 └── test/
     ├── data/
@@ -87,7 +90,15 @@ python src/scp_downloader.py 1123 --range --end 1132
 python src/scp_downloader.py 5360 --range --end 5370
 ```
 
-### 2. Build Complete Book
+### 2. Inspect Downloads in the Web View
+
+```bash
+uv run src/run_web.py
+```
+
+Open the printed local URL. The web view can download pages, parse them, list every downloaded slug (including related non-SCP pages), and preview raw HTML, wikidot source, parsed JSON, and rendered Markdown.
+
+### 3. Build Complete Book
 
 ```bash
 python src/pipeline/builder.py
@@ -148,7 +159,7 @@ chapters = builder.organize_into_chapters()
 main_latex = builder.generate_latex(chapters, latex_files)
 
 # Compile existing LaTeX to PDF
-from pipeline.compile_latex import compile_latex_to_pdf
+from latex_pipeline.compile_latex import compile_latex_to_pdf
 success, pdf_path, error = compile_latex_to_pdf('output/latex/scp_book.tex')
 ```
 

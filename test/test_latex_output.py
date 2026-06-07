@@ -228,7 +228,7 @@ class TestBookCompilation:
         if not self._check_pdflatex_available():
             pytest.skip("pdflatex not available")
 
-        from latex.enhanced_converter import EnhancedLaTeXConverter
+        from latex_pipeline.enhanced_converter import EnhancedLaTeXConverter
         from pipeline.builder import PipelineConfig
 
         # Parse all test files
@@ -329,7 +329,7 @@ def generate_expected_files():
     sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
     from parsers.enhanced_wikidot_parser import EnhancedWikidotParser
-    from latex.enhanced_converter import EnhancedLaTeXConverter
+    from latex_pipeline.enhanced_converter import EnhancedLaTeXConverter
     from pipeline.builder import PipelineConfig
 
     fixtures_dir = Path(__file__).parent / "data" / "input"

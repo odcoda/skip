@@ -32,9 +32,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from scp_downloader import SCPDownloader
 from parsers.enhanced_wikidot_parser import EnhancedWikidotParser
-from latex.enhanced_converter import EnhancedLaTeXConverter
+from parsers.markdown_renderer import MarkdownRenderer
+from latex_pipeline.enhanced_converter import EnhancedLaTeXConverter
 from pipeline.builder import SCPBookBuilder, PipelineConfig
-from pipeline.compile_latex import compile_latex_to_pdf
+from latex_pipeline.compile_latex import compile_latex_to_pdf
 from web.pdf_utils import convert_pdf_to_images, get_pdf_page_count
 
 app = Flask(__name__)
@@ -55,54 +56,110 @@ for dir_path in [DOWNLOADS_DIR, RAW_DOWNLOADS_DIR, OUTPUT_DIR, INTERMEDIATE_DIR,
     dir_path.mkdir(parents=True, exist_ok=True)
 
 
-def get_scp_number(filename):
-    """Extract SCP number from filename like 'scp-173.txt' -> '173'"""
-    match = re.search(r'scp-(\d+)', filename.lower())
+def get_page_slug(filename):
+    """Extract the stable page slug from an output filename."""
+    return Path(filename).stem
+
+
+def get_display_name(slug):
+    """Return a human-friendly page label for a downloaded slug."""
+    match = re.fullmatch(r'scp-(\d+)', slug.lower())
+    if match:
+        return f"SCP-{match.group(1)}"
+    return slug
+
+
+def get_scp_number(slug):
+    """Extract an SCP number from a page slug, if present."""
+    match = re.fullmatch(r'scp-(\d+)', slug.lower())
     return match.group(1) if match else None
+
+
+def normalize_page_input(value):
+    """Normalize user input into a downloader page slug or URL."""
+    page = str(value).strip()
+    if page.lower().startswith("scp-"):
+        return page.lower()
+    if page.isdigit():
+        return f"scp-{page}"
+    return page
+
+
+def slug_to_latex_filename(slug):
+    """Map a page slug to the filename used by the web LaTeX preview."""
+    scp_num = get_scp_number(slug)
+    if scp_num:
+        return f"scp_{scp_num}.tex"
+    safe_slug = re.sub(r"[^a-zA-Z0-9_.-]+", "_", slug).strip("_")
+    return f"{safe_slug}.tex"
+
+
+def article_sort_key(article):
+    """Sort SCP pages numerically and related pages alphabetically."""
+    scp_num = article.get("scp_number")
+    if scp_num is not None:
+        return (0, int(scp_num), "")
+    return (1, 0, article["slug"])
 
 
 def get_article_status():
     """
-    Scan directories and return status of all known SCP articles.
+    Scan directories and return status of all known downloaded/parsed pages.
 
-    Returns dict mapping SCP number to status info.
+    Returns dict mapping page slug to status info.
     """
     articles = {}
 
-    # Find all downloaded files
-    for txt_file in DOWNLOADS_DIR.glob("scp-*.txt"):
-        scp_num = get_scp_number(txt_file.name)
-        if scp_num:
-            stat = txt_file.stat()
-            articles[scp_num] = {
-                "number": scp_num,
-                "downloaded": True,
-                "download_path": str(txt_file),
-                "download_size": stat.st_size,
-                "download_time": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+    # Find all downloaded wikidot-source files, including related non-SCP pages.
+    for txt_file in DOWNLOADS_DIR.glob("*.txt"):
+        slug = get_page_slug(txt_file.name)
+        stat = txt_file.stat()
+        raw_html_path = RAW_DOWNLOADS_DIR / f"{slug}.html"
+        articles[slug] = {
+            "slug": slug,
+            "number": get_scp_number(slug) or slug,
+            "scp_number": get_scp_number(slug),
+            "display_name": get_display_name(slug),
+            "downloaded": True,
+            "download_path": str(txt_file),
+            "download_size": stat.st_size,
+            "download_time": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+            "raw_html": raw_html_path.exists(),
+            "raw_html_path": str(raw_html_path) if raw_html_path.exists() else None,
+            "parsed": False,
+            "markdown_available": False,
+            "latex_generated": False,
+            "pdf_compiled": False
+        }
+
+    # Check for parsed JSON files
+    for json_file in INTERMEDIATE_DIR.glob("*.json"):
+        slug = get_page_slug(json_file.name)
+        if slug not in articles:
+            articles[slug] = {
+                "slug": slug,
+                "number": get_scp_number(slug) or slug,
+                "scp_number": get_scp_number(slug),
+                "display_name": get_display_name(slug),
+                "downloaded": False,
+                "raw_html": False,
                 "parsed": False,
+                "markdown_available": False,
                 "latex_generated": False,
                 "pdf_compiled": False
             }
-
-    # Check for parsed JSON files
-    for json_file in INTERMEDIATE_DIR.glob("scp-*.json"):
-        scp_num = get_scp_number(json_file.name)
-        if scp_num and scp_num in articles:
-            articles[scp_num]["parsed"] = True
-            articles[scp_num]["json_path"] = str(json_file)
+        articles[slug]["parsed"] = True
+        articles[slug]["markdown_available"] = True
+        articles[slug]["json_path"] = str(json_file)
 
     # Check for individual LaTeX files
     articles_dir = LATEX_DIR / "articles"
     if articles_dir.exists():
-        for tex_file in articles_dir.glob("scp_*.tex"):
-            # scp_173.tex -> 173
-            match = re.search(r'scp_(\d+)\.tex', tex_file.name)
-            if match:
-                scp_num = match.group(1)
-                if scp_num in articles:
-                    articles[scp_num]["latex_generated"] = True
-                    articles[scp_num]["latex_path"] = str(tex_file)
+        for slug, article in articles.items():
+            tex_file = articles_dir / slug_to_latex_filename(slug)
+            if tex_file.exists():
+                article["latex_generated"] = True
+                article["latex_path"] = str(tex_file)
 
     # Check for compiled PDFs (individual or book)
     main_pdf = PDF_DIR / "scp_book.pdf"
@@ -146,7 +203,7 @@ def api_articles():
     articles = get_article_status()
 
     # Convert to sorted list
-    article_list = sorted(articles.values(), key=lambda x: int(x["number"]))
+    article_list = sorted(articles.values(), key=article_sort_key)
 
     return jsonify({
         "articles": article_list,
@@ -158,29 +215,38 @@ def api_articles():
     })
 
 
-@app.route('/api/article/<scp_num>')
-def api_article_detail(scp_num):
-    """Get detailed info about a specific article."""
+@app.route('/api/article/<path:page_slug>')
+def api_article_detail(page_slug):
+    """Get detailed info about a specific downloaded or parsed page."""
     articles = get_article_status()
 
-    if scp_num not in articles:
-        return jsonify({"error": f"SCP-{scp_num} not found"}), 404
+    if page_slug not in articles:
+        return jsonify({"error": f"{page_slug} not found"}), 404
 
-    article = articles[scp_num]
+    article = articles[page_slug]
 
     # Try to load parsed content if available
     if article.get("parsed") and article.get("json_path"):
         try:
-            with open(article["json_path"], 'r') as f:
+            with open(article["json_path"], 'r', encoding='utf-8') as f:
                 article["parsed_content"] = json.load(f)
+            article["markdown_preview"] = MarkdownRenderer().render_document(article["parsed_content"])
         except:
             pass
 
-    # Load raw content preview
+    # Load wikidot source preview
     if article.get("downloaded") and article.get("download_path"):
         try:
             with open(article["download_path"], 'r', encoding='utf-8') as f:
-                article["raw_preview"] = f.read(5000)
+                article["source_preview"] = f.read(10000)
+        except:
+            pass
+
+    # Load full-page raw HTML preview
+    if article.get("raw_html_path"):
+        try:
+            with open(article["raw_html_path"], 'r', encoding='utf-8') as f:
+                article["raw_html_preview"] = f.read(10000)
         except:
             pass
 
@@ -195,19 +261,19 @@ def api_download():
     if not data:
         return jsonify({"error": "No data provided"}), 400
 
-    scp_numbers = data.get("scp_numbers", [])
-    if isinstance(scp_numbers, str):
-        scp_numbers = [scp_numbers]
+    page_slugs = data.get("page_slugs", data.get("scp_numbers", []))
+    if isinstance(page_slugs, str):
+        page_slugs = [page_slugs]
 
     # Also support range
     start = data.get("start")
     end = data.get("end")
 
     if start and end:
-        scp_numbers = [str(i) for i in range(int(start), int(end) + 1)]
+        page_slugs = [f"scp-{i}" for i in range(int(start), int(end) + 1)]
 
-    if not scp_numbers:
-        return jsonify({"error": "No SCP numbers provided"}), 400
+    if not page_slugs:
+        return jsonify({"error": "No pages provided"}), 400
 
     results = []
     downloader = SCPDownloader(
@@ -215,22 +281,20 @@ def api_download():
         raw_output_dir=str(RAW_DOWNLOADS_DIR)
     )
 
-    for scp_num in scp_numbers:
+    for page_slug in page_slugs:
         try:
-            # Clean up input
-            scp_num = str(scp_num).strip()
-            if scp_num.lower().startswith("scp-"):
-                scp_num = scp_num[4:]
-
-            path = downloader.download_page(scp_num)
+            page_slug = normalize_page_input(page_slug)
+            path = downloader.download_page(page_slug)
+            saved_slug = get_page_slug(path)
             results.append({
-                "scp_number": scp_num,
+                "slug": saved_slug,
+                "display_name": get_display_name(saved_slug),
                 "success": True,
                 "path": path
             })
         except Exception as e:
             results.append({
-                "scp_number": scp_num,
+                "slug": str(page_slug),
                 "success": False,
                 "error": str(e)
             })
@@ -247,7 +311,7 @@ def api_parse():
     """Parse downloaded SCP articles to JSON."""
     data = request.json or {}
 
-    scp_numbers = data.get("scp_numbers", [])
+    page_slugs = data.get("page_slugs", data.get("scp_numbers", []))
     parse_all = data.get("all", False)
 
     parser = EnhancedWikidotParser()
@@ -255,37 +319,35 @@ def api_parse():
 
     if parse_all:
         # Parse all downloaded files
-        files = list(DOWNLOADS_DIR.glob("scp-*.txt"))
+        files = list(DOWNLOADS_DIR.glob("*.txt"))
     else:
         # Parse specific files
         files = []
-        for scp_num in scp_numbers:
-            scp_num = str(scp_num).strip()
-            if scp_num.lower().startswith("scp-"):
-                scp_num = scp_num[4:]
-
-            filepath = DOWNLOADS_DIR / f"scp-{scp_num}.txt"
+        for page_slug in page_slugs:
+            page_slug = normalize_page_input(page_slug)
+            filepath = DOWNLOADS_DIR / f"{page_slug}.txt"
             if filepath.exists():
                 files.append(filepath)
 
     for filepath in files:
-        scp_num = get_scp_number(filepath.name)
+        page_slug = get_page_slug(filepath.name)
         try:
             doc = parser.parse_file(str(filepath))
 
             # Save JSON
-            json_path = INTERMEDIATE_DIR / f"scp-{scp_num}.json"
+            json_path = INTERMEDIATE_DIR / f"{page_slug}.json"
             parser.save_json(doc, str(json_path))
 
             results.append({
-                "scp_number": scp_num,
+                "slug": page_slug,
+                "display_name": get_display_name(page_slug),
                 "success": True,
                 "sections": len(doc.sections),
                 "object_class": doc.object_class
             })
         except Exception as e:
             results.append({
-                "scp_number": scp_num,
+                "slug": page_slug,
                 "success": False,
                 "error": str(e)
             })
@@ -302,7 +364,7 @@ def api_convert():
     """Convert parsed articles to LaTeX."""
     data = request.json or {}
 
-    scp_numbers = data.get("scp_numbers", [])
+    page_slugs = data.get("page_slugs", data.get("scp_numbers", []))
     convert_all = data.get("all", False)
 
     config = PipelineConfig(
@@ -316,20 +378,17 @@ def api_convert():
 
     # Determine which files to convert
     if convert_all:
-        json_files = list(INTERMEDIATE_DIR.glob("scp-*.json"))
+        json_files = list(INTERMEDIATE_DIR.glob("*.json"))
     else:
         json_files = []
-        for scp_num in scp_numbers:
-            scp_num = str(scp_num).strip()
-            if scp_num.lower().startswith("scp-"):
-                scp_num = scp_num[4:]
-
-            json_path = INTERMEDIATE_DIR / f"scp-{scp_num}.json"
+        for page_slug in page_slugs:
+            page_slug = normalize_page_input(page_slug)
+            json_path = INTERMEDIATE_DIR / f"{page_slug}.json"
             if json_path.exists():
                 json_files.append(json_path)
             else:
                 # Try parsing first if JSON doesn't exist
-                txt_path = DOWNLOADS_DIR / f"scp-{scp_num}.txt"
+                txt_path = DOWNLOADS_DIR / f"{page_slug}.txt"
                 if txt_path.exists():
                     try:
                         doc = parser.parse_file(str(txt_path))
@@ -343,19 +402,19 @@ def api_convert():
     articles_dir.mkdir(parents=True, exist_ok=True)
 
     for json_path in json_files:
-        scp_num = get_scp_number(json_path.name)
+        page_slug = get_page_slug(json_path.name)
         try:
             # Load parsed document
             with open(json_path, 'r') as f:
                 doc_data = json.load(f)
 
             # Re-parse from original to get proper objects
-            txt_path = DOWNLOADS_DIR / f"scp-{scp_num}.txt"
+            txt_path = DOWNLOADS_DIR / f"{page_slug}.txt"
             if txt_path.exists():
                 doc = parser.parse_file(str(txt_path))
             else:
                 results.append({
-                    "scp_number": scp_num,
+                    "slug": page_slug,
                     "success": False,
                     "error": "Source file not found"
                 })
@@ -365,19 +424,20 @@ def api_convert():
             latex_content = converter.generate_document_latex(doc)
 
             # Save to individual file
-            tex_path = articles_dir / f"scp_{scp_num}.tex"
+            tex_path = articles_dir / slug_to_latex_filename(page_slug)
             with open(tex_path, 'w', encoding='utf-8') as f:
                 f.write(latex_content)
 
             results.append({
-                "scp_number": scp_num,
+                "slug": page_slug,
+                "display_name": get_display_name(page_slug),
                 "success": True,
                 "latex_path": str(tex_path),
                 "latex_size": len(latex_content)
             })
         except Exception as e:
             results.append({
-                "scp_number": scp_num,
+                "slug": page_slug,
                 "success": False,
                 "error": str(e)
             })
@@ -526,10 +586,70 @@ def api_pdf_download():
     return send_file(pdf_path, as_attachment=True, download_name="scp_book.pdf")
 
 
-@app.route('/api/latex/<scp_num>')
-def api_latex_content(scp_num):
-    """Get LaTeX content for a specific SCP."""
-    tex_path = LATEX_DIR / "articles" / f"scp_{scp_num}.tex"
+@app.route('/api/source/<path:page_slug>')
+def api_source_content(page_slug):
+    """Get downloaded wikidot source for a page."""
+    source_path = DOWNLOADS_DIR / f"{page_slug}.txt"
+
+    if not source_path.exists():
+        return jsonify({"error": "Downloaded source not found"}), 404
+
+    with open(source_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    return jsonify({
+        "slug": page_slug,
+        "content": content,
+        "path": str(source_path)
+    })
+
+
+@app.route('/api/raw-html/<path:page_slug>')
+def api_raw_html_content(page_slug):
+    """Get downloaded raw HTML for a page."""
+    html_path = RAW_DOWNLOADS_DIR / f"{page_slug}.html"
+
+    if not html_path.exists():
+        return jsonify({"error": "Raw HTML file not found"}), 404
+
+    with open(html_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    return jsonify({
+        "slug": page_slug,
+        "content": content,
+        "path": str(html_path)
+    })
+
+
+@app.route('/api/markdown/<path:page_slug>')
+def api_markdown_content(page_slug):
+    """Get rendered Markdown from parsed JSON, parsing from source if needed."""
+    json_path = INTERMEDIATE_DIR / f"{page_slug}.json"
+
+    try:
+        if json_path.exists():
+            markdown = MarkdownRenderer().render_json_file(json_path)
+        else:
+            source_path = DOWNLOADS_DIR / f"{page_slug}.txt"
+            if not source_path.exists():
+                return jsonify({"error": "Page source not found"}), 404
+            doc = EnhancedWikidotParser().parse_file(str(source_path))
+            markdown = MarkdownRenderer().render_document(doc)
+
+        return jsonify({
+            "slug": page_slug,
+            "content": markdown,
+            "path": str(json_path) if json_path.exists() else None
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/latex/<path:page_slug>')
+def api_latex_content(page_slug):
+    """Get LaTeX content for a specific page."""
+    tex_path = LATEX_DIR / "articles" / slug_to_latex_filename(page_slug)
 
     if not tex_path.exists():
         return jsonify({"error": "LaTeX file not found"}), 404
@@ -538,7 +658,7 @@ def api_latex_content(scp_num):
         content = f.read()
 
     return jsonify({
-        "scp_number": scp_num,
+        "slug": page_slug,
         "content": content,
         "path": str(tex_path)
     })
@@ -555,9 +675,9 @@ def api_search():
     articles = get_article_status()
     results = []
 
-    for scp_num, article in articles.items():
+    for slug, article in articles.items():
         # Search by number
-        if query.lower() in f"scp-{scp_num}".lower():
+        if query.lower() in article["display_name"].lower() or query.lower() in slug.lower():
             results.append(article)
             continue
 

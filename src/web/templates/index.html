@@ -9,7 +9,7 @@
 <body>
     <header>
         <h1>SCP Foundation Book Generator</h1>
-        <p class="subtitle">Download, Convert, and Render SCP Articles to LaTeX Books</p>
+        <p class="subtitle">Download, inspect, and parse SCP Foundation pages</p>
     </header>
 
     <main>
@@ -52,10 +52,10 @@
             </div>
 
             <div class="control-group">
-                <h3>Batch Operations</h3>
+                <h3>Build Output</h3>
                 <div class="button-row">
                     <button id="btn-parse-all" class="btn">Parse All</button>
-                    <button id="btn-convert-all" class="btn">Convert All</button>
+                    <button id="btn-convert-all" class="btn">Generate LaTeX</button>
                     <button id="btn-compile" class="btn btn-primary">Compile PDF</button>
                 </div>
             </div>
@@ -127,12 +127,20 @@
                 </div>
                 <div class="modal-body">
                     <div class="tabs">
-                        <button class="tab active" data-tab="raw">Raw Source</button>
+                        <button class="tab active" data-tab="raw-html">Raw HTML</button>
+                        <button class="tab" data-tab="source">Wikidot Source</button>
+                        <button class="tab" data-tab="markdown">Markdown</button>
                         <button class="tab" data-tab="parsed">Parsed JSON</button>
                         <button class="tab" data-tab="latex">LaTeX</button>
                     </div>
-                    <div class="tab-content" id="tab-raw">
-                        <pre id="article-raw"></pre>
+                    <div class="tab-content" id="tab-raw-html">
+                        <pre id="article-raw-html"></pre>
+                    </div>
+                    <div class="tab-content" id="tab-source" style="display: none;">
+                        <pre id="article-source"></pre>
+                    </div>
+                    <div class="tab-content" id="tab-markdown" style="display: none;">
+                        <pre id="article-markdown"></pre>
                     </div>
                     <div class="tab-content" id="tab-parsed" style="display: none;">
                         <pre id="article-parsed"></pre>

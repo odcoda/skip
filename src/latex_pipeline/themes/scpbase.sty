@@ -20,7 +20,16 @@
 \RequirePackage{caption}
 
 % ─── Page geometry (themes may override) ─────────────────────────────
-\geometry{margin=1in, headheight=15pt}
+% Default: 6x9 trade paperback
+\geometry{
+  paperwidth=6in,
+  paperheight=9in,
+  inner=0.875in,
+  outer=0.625in,
+  top=0.875in,
+  bottom=0.75in,
+  headheight=15pt
+}
 
 % ─── Basic colors ────────────────────────────────────────────────────
 \definecolor{scpred}{RGB}{187,0,0}
@@ -56,8 +65,12 @@
 % Log/experiment header
 \newcommand{\logheader}[1]{\textbf{#1}\\[0.3cm]}
 
-% Redaction black box
+% Redaction black box (legacy single-character)
 \newcommand{\blackbox}{\rule{1ex}{1.2ex}}
+
+% Redaction bar — N characters wide, looks like censorship
+% Usage: \redact{5} for a 5-character redaction
+\newcommand{\redact}[1]{\rule{#1em}{1.2ex}}
 
 % SCP number formatting
 \newcommand{\scpnumber}[1]{\textbf{\large #1}}

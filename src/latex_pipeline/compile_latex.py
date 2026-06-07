@@ -11,8 +11,8 @@ import subprocess
 import shutil
 from pathlib import Path
 
-# Theme directory (src/latex/themes)
-THEMES_DIR = Path(__file__).parent.parent / "latex" / "themes"
+# Theme directory (src/latex_pipeline/themes)
+THEMES_DIR = Path(__file__).parent / "themes"
 
 
 def compile_latex_to_pdf(latex_file, output_pdf_dir=None, build_dir=None, themes_dir=None):

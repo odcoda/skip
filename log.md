@@ -3,9 +3,9 @@
 ## 2026-02-20 REDACTED theme system implemented
 
 Added modular LaTeX theme system:
-- `src/latex/themes/scpbase.sty` — base semantic layer (all commands/environments with minimal defaults)
-- `src/latex/themes/redacted.sty` — classified-document theme (red accents, Courier headers, tcolorbox sections, classification stamps, styled title page)
-- `src/latex/themes/graphics/stamps.tex` — reusable TikZ decorative elements
+- `src/latex_pipeline/themes/scpbase.sty` — base semantic layer (all commands/environments with minimal defaults)
+- `src/latex_pipeline/themes/redacted.sty` — classified-document theme (red accents, Courier headers, tcolorbox sections, classification stamps, styled title page)
+- `src/latex_pipeline/themes/graphics/stamps.tex` — reusable TikZ decorative elements
 
 Pipeline changes:
 - `enhanced_converter.py`: removed all hardcoded styling, preamble now just loads `\usepackage{scpbase}` + `\usepackage{<theme>}`
@@ -156,7 +156,7 @@ Up next:
 ## 2026-02-20 right-aligned image rendering fix (volume1)
 Fixed missing right-aligned top images in `output/pdf/scp_book.pdf`:
 - Root cause: `wrapfigure` blocks were emitted before paragraph text at section starts, causing images to disappear in PDF output
-- Replaced top image rendering with explicit `flushright` image blocks in converter (`src/latex/enhanced_converter.py`)
+- Replaced top image rendering with explicit `flushright` image blocks in converter (`src/latex_pipeline/enhanced_converter.py`)
 
 Verification:
 - Rebuilt Volume 1 (`uv run src/build_volume1.py`)
@@ -193,3 +193,9 @@ Validated with:
 - `uv run --with pytest --with requests --with beautifulsoup4 pytest test -q` (17 passed)
 Up next:
 - add endpoint-level tests for web API orchestration paths (`/api/parse`, `/api/convert`, `/api/compile`)
+
+## 2026-06-07 web-first preview and LaTeX split
+Separated LaTeX tooling into `src/latex_pipeline/` and expanded the web view:
+- lists all downloaded page slugs, not just `scp-*.txt`
+- previews raw HTML, wikidot source, parsed JSON, and rendered Markdown
+- keeps LaTeX generation as optional build output
